@@ -487,6 +487,71 @@ button {
   justify-self: start;
 }
 
+.weakness-panel {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgba(255, 252, 246, 0.38);
+}
+
+.weakness-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.weakness-head strong {
+  color: var(--gold);
+}
+
+.weakness-head span,
+.weakness-item small {
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+
+.weakness-list {
+  display: grid;
+  gap: 10px;
+}
+
+.weakness-item {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid rgba(156, 121, 64, 0.22);
+  border-radius: 12px;
+  background: rgba(255, 249, 238, 0.62);
+}
+
+.weakness-item div {
+  display: grid;
+  gap: 2px;
+}
+
+.weakness-item strong {
+  color: var(--brown);
+}
+
+.weakness-item span,
+.weakness-item p {
+  color: var(--muted);
+}
+
+.weakness-item p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.weakness-item .primary-btn,
+.weakness-item .secondary-btn {
+  justify-self: start;
+}
+
 .quick-links,
 .card-grid,
 .tarot-grid,
@@ -544,26 +609,6 @@ button {
 .tarot-basic-tags {
   margin: -4px 0 0;
   font-size: 0.82rem;
-}
-
-.status-pill {
-  justify-self: start;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 4px 9px;
-  font-size: 0.76rem;
-  color: var(--muted);
-  background: rgba(255, 252, 246, 0.58);
-}
-
-.status-pill.done {
-  color: #49633f;
-  background: rgba(142, 163, 122, 0.16);
-}
-
-.status-pill.pending {
-  color: #8a6a35;
-  background: rgba(216, 175, 95, 0.13);
 }
 
 .card-grid {
@@ -815,6 +860,18 @@ button {
   justify-self: start;
 }
 
+.learning-warning {
+  margin: 0;
+  color: var(--wine);
+  font-weight: 700;
+}
+
+.learning-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 .card-quiz-panel {
   display: grid;
   gap: 14px;
@@ -900,8 +957,8 @@ textarea:focus {
 }
 
 .tarot-card {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-rows: auto auto auto auto 1fr auto;
   gap: 12px;
   min-height: 100%;
 }
@@ -933,6 +990,7 @@ textarea:focus {
   margin-top: auto;
   display: flex;
   gap: 8px;
+  align-self: end;
 }
 
 .tarot-card-actions button {

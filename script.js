@@ -1632,6 +1632,91 @@ function uniqueOptions(correct, pool, size = 4) {
   return options.sort(() => Math.random() - 0.5);
 }
 
+function getSafeText(value, fallback = "待补充", maxLength = 56) {
+  const raw = Array.isArray(value) ? value.filter(Boolean).join("、") : value;
+  const text = String(raw ?? "").replace(/\s+/g, " ").trim();
+  const safe = text && !["undefined", "null"].includes(text.toLowerCase()) ? text : fallback;
+  return safe.length > maxLength ? `${safe.slice(0, maxLength)}…` : safe;
+}
+
+function getCardKeywords(card) {
+  return [...new Set([...(card?.keywordsZh || []), ...(card?.keywords || [])].filter(Boolean))];
+}
+
+function getCardKeywordOption(card) {
+  return getSafeText(getCardKeywords(card).slice(0, 4), "核心主题、能量变化、学习重点", 32);
+}
+
+function getCardUprightMeaning(card) {
+  return getSafeText(card?.upright || card?.uprightScenes || card?.coreThemeZh || getCardKeywords(card), "这张牌提示你观察当前主题。", 58);
+}
+
+function getCardReversedMeaning(card) {
+  return getSafeText(card?.reversed || card?.reversedLogic || card?.coreThemeZh || getCardKeywords(card), "这张牌逆位提示能量受阻、内化或失衡。", 58);
+}
+
+function getCardDisplayName(card) {
+  return `${getSafeText(card?.zhName, "未知牌", 24)} / ${getSafeText(card?.nameEn || card?.name, "Unknown Card", 32)}`;
+}
+
+const genericQuizDistractors = [
+  "强调先观察当下状态，再做出清醒选择。",
+  "提醒你调整节奏，避免只凭惯性行动。",
+  "提示某种能量正在失衡，需要重新校准。",
+  "更适合从现实条件、内在感受和行动后果一起判断。",
+  "重点在于看见隐藏模式，而不是立刻下结论。",
+  "提醒你把注意力放回具体需求和真实边界。"
+];
+
+function escapeRegExp(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function getAllCardNameTokens() {
+  return tarotCards
+    .flatMap((card) => [card.zhName, card.nameEn, card.name, card.cardNameZh, card.cardNameEn])
+    .filter(Boolean)
+    .sort((a, b) => String(b).length - String(a).length);
+}
+
+function sanitizeQuizOptionText(text, card = null) {
+  let cleaned = getSafeText(text, "", 80);
+  getAllCardNameTokens().forEach((name) => {
+    cleaned = cleaned.replace(new RegExp(escapeRegExp(name), "gi"), "");
+  });
+  if (card) {
+    [card.zhName, card.nameEn, card.name].filter(Boolean).forEach((name) => {
+      cleaned = cleaned.replace(new RegExp(escapeRegExp(name), "gi"), "");
+    });
+  }
+  cleaned = cleaned
+    .replace(/(?:正位|逆位)的?\s*/g, "")
+    .replace(/这张牌是\s*/g, "")
+    .replace(/^[：:，,、\s]+/, "")
+    .replace(/\s+/g, " ")
+    .replace(/([。！？；])\1+/g, "$1")
+    .trim();
+  if (!cleaned || cleaned.length < 6 || ["。", "，", "、"].includes(cleaned)) {
+    return "关注这组含义背后的核心能量。";
+  }
+  return getSafeText(cleaned, "关注这组含义背后的核心能量。", 58);
+}
+
+function buildQuizOptions(correct, pools, fallbackPool = [], config = {}) {
+  const { allowCardNames = false, card = null } = config;
+  const normalize = (item) => allowCardNames
+    ? getSafeText(item, "待补充", 58)
+    : sanitizeQuizOptionText(item, card);
+  const answer = normalize(correct);
+  const distractors = pools
+    .flat()
+    .concat(fallbackPool)
+    .concat(genericQuizDistractors)
+    .map(normalize)
+    .filter((item) => item && item !== answer);
+  return uniqueOptions(answer, distractors, 4);
+}
+
 function generateQuizQuestions() {
   const cards = [...tarotCards].sort(() => Math.random() - 0.5);
   const q = [];
@@ -2031,21 +2116,108 @@ function getDueReviewCards() {
     .map(({ card }) => card);
 }
 
+const questionTypeLabels = {
+  name: "牌名识别",
+  keyword: "关键词匹配",
+  upright: "正位含义",
+  reversed: "逆位含义",
+  scenario: "情境理解",
+  visual: "图像象征",
+  system: "元素/牌组理解",
+  contrast: "易混淆辨析"
+};
+
+function getQuestionResults() {
+  return [...document.querySelectorAll("#modal-card-quiz .card-quiz-question")].map((question) => {
+    const questionType = question.dataset.questionType || "scenario";
+    const selectedAnswer = question.dataset.selected || "未作答";
+    const correctAnswer = question.dataset.answer || "待补充";
+    return {
+      questionType,
+      questionLabel: question.dataset.questionLabel || questionTypeLabels[questionType] || "综合理解",
+      questionText: question.dataset.questionText || question.querySelector("legend")?.textContent?.replace(/^\d+\.\s*/, "") || "待补充",
+      selectedAnswer,
+      correctAnswer,
+      isCorrect: selectedAnswer === correctAnswer
+    };
+  });
+}
+
+function getLatestWrongResult(state) {
+  const history = [...(state.testHistory || [])].reverse();
+  for (const record of history) {
+    const wrong = (record.questionResults || []).filter((result) => result && result.isCorrect === false);
+    if (wrong.length) return { record, result: wrong[0] };
+  }
+  return null;
+}
+
+function getWeaknessStats() {
+  const stats = Object.fromEntries(Object.entries(questionTypeLabels).map(([type, label]) => [type, { type, label, count: 0 }]));
+  Object.values(getLearningState()).forEach((state) => {
+    (state.testHistory || []).forEach((record) => {
+      (record.questionResults || []).forEach((result) => {
+        if (!result || result.isCorrect !== false) return;
+        const type = result.questionType || "scenario";
+        if (!stats[type]) stats[type] = { type, label: result.questionLabel || "综合理解", count: 0 };
+        stats[type].count += 1;
+      });
+    });
+  });
+  return Object.values(stats);
+}
+
+function getWeakCards() {
+  return tarotCards
+    .map((card) => {
+      const state = getCardLearningState(card.id);
+      const latestWrong = getLatestWrongResult(state);
+      return {
+        card,
+        state,
+        latestWrong,
+        hasRecentWrong: Boolean(latestWrong)
+      };
+    })
+    .filter(({ state, hasRecentWrong }) => state.status === "weak" || state.wrongCount > 0 || hasRecentWrong)
+    .sort((a, b) => {
+      if (a.state.status !== b.state.status) {
+        if (a.state.status === "weak") return -1;
+        if (b.state.status === "weak") return 1;
+      }
+      if (b.state.wrongCount !== a.state.wrongCount) return b.state.wrongCount - a.state.wrongCount;
+      const aTime = new Date(a.latestWrong?.record?.createdAt || a.state.updatedAt || 0).getTime();
+      const bTime = new Date(b.latestWrong?.record?.createdAt || b.state.updatedAt || 0).getTime();
+      if (bTime !== aTime) return bTime - aTime;
+      return a.state.masteryLevel - b.state.masteryLevel;
+    });
+}
+
 function renderCardLearningStatus(card) {
   const state = getCardLearningState(card.id);
+  const needsPractice = state.status === "weak" || state.wrongCount > 0;
   let action = "";
   if (state.status === "new") {
     action = `<button class="primary-btn" type="button" data-start-learning="${escapeHtml(card.id)}">开始学习</button>`;
   } else if (state.status === "learning") {
     action = `<button class="primary-btn" type="button" data-start-card-quiz="${escapeHtml(card.id)}">进入小测</button>`;
   } else if (state.status === "weak") {
-    action = `<button class="primary-btn" type="button" data-start-card-quiz="${escapeHtml(card.id)}">重新小测</button>`;
+    action = `<div class="learning-actions">
+      <button class="secondary-btn" type="button" data-relearn-card="${escapeHtml(card.id)}">重新学习</button>
+      <button class="primary-btn" type="button" data-start-card-quiz="${escapeHtml(card.id)}">重新小测</button>
+    </div>`;
   } else if (state.status === "reviewing") {
     action = isReviewDue(state.nextReviewAt)
       ? `<button class="primary-btn" type="button" data-start-review-quiz="${escapeHtml(card.id)}">开始复习</button>`
       : `<p class="learning-status-note">你已通过初次小测，请在下次复习日期回来复习。</p>`;
   } else if (state.status === "mastered") {
     action = `<p class="learning-status-note">这张牌已掌握。</p>`;
+  }
+  if (needsPractice && state.status !== "weak") {
+    action += `<div class="learning-actions">
+      <button class="secondary-btn" type="button" data-relearn-card="${escapeHtml(card.id)}">重新学习</button>
+      <button class="primary-btn" type="button" data-start-card-quiz="${escapeHtml(card.id)}">重新小测</button>
+    </div>`;
   }
   return `
     <div class="learning-status-grid">
@@ -2062,6 +2234,7 @@ function renderCardLearningStatus(card) {
         <strong>${formatReviewDate(state.nextReviewAt)}</strong>
       </div>
     </div>
+    ${needsPractice ? `<p class="learning-warning">这张牌需要加强，建议重新学习后再小测。</p>` : ""}
     ${action}
   `;
 }
@@ -2072,7 +2245,7 @@ function refreshCardLearningStatus(card) {
 }
 
 function optionText(value, fallback = "待补充") {
-  return String(value || fallback).replace(/\s+/g, " ").trim().slice(0, 72);
+  return getSafeText(value, fallback, 58);
 }
 
 function cardMeaningOption(card, type = "upright") {
@@ -2082,8 +2255,8 @@ function cardMeaningOption(card, type = "upright") {
 }
 
 function cardSituationOption(card) {
-  const theme = optionText(card.coreThemeZh || card.upright || card.keywordsZh?.join("、"), "观察这张牌的核心主题。");
-  return `这更像是在提醒你：${theme}`;
+  const theme = getSafeText(card?.coreThemeZh || card?.upright || getCardKeywords(card), "观察这张牌的核心主题。", 38);
+  return `先关注：${theme}`;
 }
 
 function tomorrowIsoString() {
@@ -2094,34 +2267,45 @@ function tomorrowIsoString() {
 
 function generateCardQuiz(card) {
   const otherCards = tarotCards.filter((item) => item.id !== card.id);
-  const keyword = card.keywordsZh?.[0] || card.keywords?.[0] || "核心主题";
-  const otherKeywords = otherCards.flatMap((item) => item.keywordsZh || item.keywords || []);
-  const nameAnswer = `${card.zhName} / ${card.nameEn}`;
+  const keyword = getCardKeywordOption(card);
+  const otherKeywordOptions = otherCards.map(getCardKeywordOption);
+  const nameAnswer = getCardDisplayName(card);
+  const fallbackMeanings = tarotCards.flatMap((item) => [getCardUprightMeaning(item), getCardReversedMeaning(item), cardSituationOption(item)]);
   return [
     {
+      type: "name",
+      label: questionTypeLabels.name,
       question: "这张牌是？",
       answer: nameAnswer,
-      options: uniqueOptions(nameAnswer, otherCards.map((item) => `${item.zhName} / ${item.nameEn}`))
+      options: buildQuizOptions(nameAnswer, [otherCards.map(getCardDisplayName)], [], { allowCardNames: true })
     },
     {
+      type: "keyword",
+      label: questionTypeLabels.keyword,
       question: "以下哪个关键词最符合这张牌？",
       answer: keyword,
-      options: uniqueOptions(keyword, otherKeywords)
+      options: buildQuizOptions(keyword, [otherKeywordOptions], [], { card })
     },
     {
-      question: "这张牌正位更接近以下哪种含义？",
-      answer: cardMeaningOption(card, "upright"),
-      options: uniqueOptions(cardMeaningOption(card, "upright"), otherCards.map((item) => cardMeaningOption(item, "upright")))
+      type: "upright",
+      label: questionTypeLabels.upright,
+      question: "当这张牌正位出现时，它通常更强调什么？",
+      answer: sanitizeQuizOptionText(getCardUprightMeaning(card), card),
+      options: buildQuizOptions(getCardUprightMeaning(card), [otherCards.map(getCardUprightMeaning)], fallbackMeanings, { card })
     },
     {
-      question: "这张牌逆位更接近以下哪种含义？",
-      answer: cardMeaningOption(card, "reversed"),
-      options: uniqueOptions(cardMeaningOption(card, "reversed"), otherCards.map((item) => cardMeaningOption(item, "reversed")))
+      type: "reversed",
+      label: questionTypeLabels.reversed,
+      question: "当这张牌逆位出现时，它更可能提醒什么？",
+      answer: sanitizeQuizOptionText(getCardReversedMeaning(card), card),
+      options: buildQuizOptions(getCardReversedMeaning(card), [otherCards.map(getCardReversedMeaning)], fallbackMeanings, { card })
     },
     {
-      question: "如果问题是“我最近的状态如何？”，抽到这张牌时，哪个解读更合理？",
-      answer: cardSituationOption(card),
-      options: uniqueOptions(cardSituationOption(card), otherCards.map(cardSituationOption))
+      type: "scenario",
+      label: questionTypeLabels.scenario,
+      question: "如果问题是“我最近的状态如何？”，这张牌更可能提示什么？",
+      answer: sanitizeQuizOptionText(cardSituationOption(card), card),
+      options: buildQuizOptions(cardSituationOption(card), [otherCards.map(cardSituationOption)], fallbackMeanings, { card })
     }
   ];
 }
@@ -2132,7 +2316,7 @@ function renderCardQuiz(card) {
     <h3>基础小测</h3>
     <p class="learning-status-note">共 5 题。完成后会更新这张牌的学习状态。</p>
     ${questions.map((item, index) => `
-      <fieldset class="card-quiz-question" data-question-index="${index}" data-answer="${escapeHtml(item.answer)}">
+      <fieldset class="card-quiz-question" data-question-index="${index}" data-question-type="${escapeHtml(item.type)}" data-question-label="${escapeHtml(item.label)}" data-question-text="${escapeHtml(item.question)}" data-answer="${escapeHtml(item.answer)}">
         <legend>${index + 1}. ${escapeHtml(item.question)}</legend>
         <div class="quiz-options">
           ${item.options.map((option) => `<button class="quiz-option" type="button" data-card-quiz-option="${escapeHtml(option)}">${escapeHtml(option)}</button>`).join("")}
@@ -2147,9 +2331,16 @@ function renderCardQuiz(card) {
 function generateReviewQuiz(card) {
   const initial = generateCardQuiz(card);
   return [initial[1], {
+    type: "reversed",
+    label: "正逆位理解",
     question: "这张牌的正逆位理解，哪一项更合理？",
-    answer: cardMeaningOption(card, "upright"),
-    options: uniqueOptions(cardMeaningOption(card, "upright"), tarotCards.filter((item) => item.id !== card.id).map((item) => cardMeaningOption(item, "reversed")))
+    answer: sanitizeQuizOptionText(getCardReversedMeaning(card), card),
+    options: buildQuizOptions(
+      getCardReversedMeaning(card),
+      [tarotCards.filter((item) => item.id !== card.id).map(getCardReversedMeaning)],
+      tarotCards.map(getCardUprightMeaning),
+      { card }
+    )
   }, initial[4]];
 }
 
@@ -2159,7 +2350,7 @@ function renderReviewQuiz(card) {
     <h3>今日复习小测</h3>
     <p class="learning-status-note">共 3 题。通过后会更新掌握等级和下次复习日期。</p>
     ${questions.map((item, index) => `
-      <fieldset class="card-quiz-question" data-question-index="${index}" data-answer="${escapeHtml(item.answer)}">
+      <fieldset class="card-quiz-question" data-question-index="${index}" data-question-type="${escapeHtml(item.type)}" data-question-label="${escapeHtml(item.label)}" data-question-text="${escapeHtml(item.question)}" data-answer="${escapeHtml(item.answer)}">
         <legend>${index + 1}. ${escapeHtml(item.question)}</legend>
         <div class="quiz-options">
           ${item.options.map((option) => `<button class="quiz-option" type="button" data-card-quiz-option="${escapeHtml(option)}">${escapeHtml(option)}</button>`).join("")}
@@ -2175,9 +2366,10 @@ function submitCardQuiz(card) {
   const questions = [...document.querySelectorAll("#modal-card-quiz .card-quiz-question")];
   const total = questions.length;
   const score = questions.filter((question) => question.dataset.selected === question.dataset.answer).length;
+  const questionResults = getQuestionResults();
   const current = getCardLearningState(card.id);
   const now = new Date().toISOString();
-  const history = [...current.testHistory, { type: "initial", score, total, passed: score >= 4, createdAt: now }];
+  const history = [...current.testHistory, { type: "initial", score, total, passed: score >= 4, createdAt: now, questionResults }];
   const basePatch = {
     firstLearnedAt: current.firstLearnedAt || now,
     testHistory: history
@@ -2219,6 +2411,7 @@ function submitCardQuiz(card) {
   updateCardLearningState(card.id, patch);
   refreshCardLearningStatus(card);
   renderDailyReviewPanel();
+  renderWeaknessPanel();
   byId("modal-card-quiz").innerHTML = `<h3>基础小测结果</h3><p>得分：${score}/${total}</p><p>${message}</p>`;
 }
 
@@ -2226,13 +2419,14 @@ function submitReviewQuiz(card) {
   const questions = [...document.querySelectorAll("#modal-card-quiz .card-quiz-question")];
   const total = questions.length;
   const score = questions.filter((question) => question.dataset.selected === question.dataset.answer).length;
+  const questionResults = getQuestionResults();
   const current = getCardLearningState(card.id);
   const now = new Date().toISOString();
   const passed = score >= 2;
   const nextLevel = passed
     ? Math.min(current.masteryLevel + 1, 5)
     : Math.max(current.masteryLevel - 1, 0);
-  const history = [...current.testHistory, { type: "review", score, total, passed, createdAt: now }];
+  const history = [...current.testHistory, { type: "review", score, total, passed, createdAt: now, questionResults }];
   const patch = passed ? {
     status: nextLevel >= 5 ? "mastered" : "reviewing",
     masteryLevel: nextLevel,
@@ -2258,6 +2452,7 @@ function submitReviewQuiz(card) {
   updateCardLearningState(card.id, patch);
   refreshCardLearningStatus(card);
   renderDailyReviewPanel();
+  renderWeaknessPanel();
   const remaining = getDueReviewCards();
   byId("modal-card-quiz").innerHTML = `
     <h3>复习结果</h3>
@@ -2279,8 +2474,56 @@ Object.assign(window, {
   resetLearningState,
   getReviewIntervalDays,
   calculateNextReviewDate,
-  getDueReviewCards
+  getDueReviewCards,
+  getWeaknessStats,
+  getWeakCards
 });
+
+function renderWeaknessPanel() {
+  const panel = byId("weakness-panel");
+  if (!panel) return;
+  const weakCards = getWeakCards();
+  const weaknessStats = getWeaknessStats().filter((item) => item.count > 0).sort((a, b) => b.count - a.count);
+  const recentWrongItems = weakCards
+    .filter((item) => item.latestWrong)
+    .slice(0, 5);
+
+  if (!weakCards.length && !recentWrongItems.length) {
+    panel.innerHTML = `
+      <div class="weakness-head">
+        <strong>薄弱牌与错题</strong>
+        <span>需加强牌卡：0 张</span>
+      </div>
+      <p class="learning-status-note">目前还没有错题记录，完成小测后这里会自动更新。</p>
+    `;
+    return;
+  }
+
+  panel.innerHTML = `
+    <div class="weakness-head">
+      <strong>薄弱牌与错题</strong>
+      <span>需加强牌卡：${weakCards.length} 张</span>
+    </div>
+    <p class="learning-status-note">最薄弱维度：${escapeHtml(weaknessStats[0]?.label || "暂无")}</p>
+    <div class="weakness-list">
+      ${recentWrongItems.length ? recentWrongItems.map(({ card, latestWrong }) => {
+        const result = latestWrong.result;
+        return `
+          <article class="weakness-item">
+            <div>
+              <strong>${escapeHtml(card.zhName)}</strong>
+              <span>${escapeHtml(card.nameEn)}</span>
+            </div>
+            <p>${escapeHtml(result.questionLabel)} · 你的选择：${escapeHtml(result.selectedAnswer)} · 正确答案：${escapeHtml(result.correctAnswer)}</p>
+            <small>${formatReviewDate(latestWrong.record.createdAt)}</small>
+            <button class="secondary-btn" type="button" data-dashboard-relearn="${escapeHtml(card.id)}">重新学习</button>
+            <button class="primary-btn" type="button" data-dashboard-requiz="${escapeHtml(card.id)}">重新小测</button>
+          </article>
+        `;
+      }).join("") : `<p class="learning-status-note">暂无具体错题记录，但有牌卡被标记为需加强。</p>`}
+    </div>
+  `;
+}
 
 function getUserStudyStats() {
   const today = new Date();
@@ -2364,6 +2607,7 @@ function updateStudyProgress() {
   if (title) title.textContent = `${stats.percent}%`;
   byId("progress-summary").textContent = `已掌握 ${stats.mastered}/${stats.total} · 已学习 ${stats.studied}/${stats.total} · 今日应复习 ${stats.dueReview}`;
   renderDailyReviewPanel();
+  renderWeaknessPanel();
 }
 
 function renderDailyReviewPanel() {
@@ -2483,7 +2727,6 @@ function renderCards() {
       </div>
       <p class="keyword-line">${card.keywords.join(", ")}</p>
       <p class="tarot-basic-tags">${getCardSystemLine(card).split(" · ").map(escapeHtml).join(" · ")}</p>
-      <span class="status-pill ${isDetailedCard(card) ? "done" : "pending"}">${getCardStatus(card)}</span>
       <p class="tarot-meta">${card.imageReading?.[0] || card.upright}</p>
       <div class="tarot-card-actions">
         <button class="secondary-btn" type="button" data-open-card="${card.name}">详情</button>
@@ -3288,6 +3531,7 @@ function init() {
     const startLearningButton = event.target.closest("[data-start-learning]");
     const startQuizButton = event.target.closest("[data-start-card-quiz]");
     const startReviewButton = event.target.closest("[data-start-review-quiz]");
+    const relearnButton = event.target.closest("[data-relearn-card]");
     const optionButton = event.target.closest("[data-card-quiz-option]");
     const submitQuizButton = event.target.closest("[data-submit-card-quiz]");
     const submitReviewButton = event.target.closest("[data-submit-review-quiz]");
@@ -3302,6 +3546,15 @@ function init() {
         firstLearnedAt: current.firstLearnedAt || new Date().toISOString()
       });
       refreshCardLearningStatus(card);
+      return;
+    }
+
+    if (relearnButton) {
+      const card = tarotCards.find((item) => item.id === relearnButton.dataset.relearnCard);
+      if (!card) return;
+      updateCardLearningState(card.id, { status: "learning" });
+      refreshCardLearningStatus(card);
+      byId("modal-card-quiz").innerHTML = "";
       return;
     }
 
@@ -3345,6 +3598,23 @@ function init() {
   });
   byId("daily-review-panel").addEventListener("click", (event) => {
     if (event.target.closest("#start-daily-review")) startNextDueReview();
+  });
+  byId("weakness-panel").addEventListener("click", (event) => {
+    const relearnButton = event.target.closest("[data-dashboard-relearn]");
+    const requizButton = event.target.closest("[data-dashboard-requiz]");
+    if (relearnButton) {
+      const card = tarotCards.find((item) => item.id === relearnButton.dataset.dashboardRelearn);
+      if (!card) return;
+      updateCardLearningState(card.id, { status: "learning" });
+      openCardModal(card.name);
+      return;
+    }
+    if (requizButton) {
+      const card = tarotCards.find((item) => item.id === requizButton.dataset.dashboardRequiz);
+      if (!card) return;
+      openCardModal(card.name);
+      renderCardQuiz(card);
+    }
   });
   document.querySelectorAll("[data-close-modal]").forEach((element) => {
     element.addEventListener("click", closeCardModal);
