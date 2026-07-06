@@ -1639,12 +1639,24 @@ function getSafeText(value, fallback = "待补充", maxLength = 56) {
   return safe.length > maxLength ? safe.slice(0, maxLength) : safe;
 }
 
+function getRawSafeText(value, fallback = "待补充") {
+  const raw = Array.isArray(value) ? value.filter(Boolean).join("、") : value;
+  const text = String(raw ?? "")
+    .replace(/\.{3,}|…/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  return text && !["undefined", "null"].includes(text.toLowerCase()) ? text : fallback;
+}
+
 function getCardKeywords(card) {
   return [...new Set([...(card?.keywordsZh || []), ...(card?.keywords || [])].filter(Boolean))];
 }
 
 function getCardKeywordOption(card) {
-  return getSafeText(getCardKeywords(card).slice(0, 4), "核心主题、能量变化、学习重点", 32);
+  return normalizeQuizOptionText(getCardKeywords(card).slice(0, 4), {
+    mode: "keyword",
+    fallback: "核心主题、能量变化、学习重点"
+  });
 }
 
 function getCardUprightMeaning(card) {
@@ -1682,36 +1694,66 @@ function getAllCardNameTokens() {
 function stripQuizOptionPrefix(text) {
   return String(text || "")
     .replace(/^(感情|工作|学习\s*\/\s*自我成长|学习|当前建议|建议|结果|阻碍|当前情况)[：:]\s*/g, "")
-    .replace(/^(先关注|它可能提醒你|这张牌提示|这更像是在提醒你|代表|可能表示|通常意味着|通常更强调)[：:，,\s]*/g, "")
+    .replace(/^(先关注|它可能提醒你|这张牌提示|这更像是在提醒你|这张牌更可能提示|代表|可能表示|通常意味着|通常更强调)[：:，,\s]*/g, "")
     .replace(/^(可能提醒你|可能暗示|可能说明|更可能提示|更可能提醒)[：:，,\s]*/g, "");
 }
 
 function splitMeaningParts(text) {
   return String(text || "")
+    .replace(/\.{3,}|…/g, "")
     .replace(/(感情|工作|学习\s*\/\s*自我成长|学习|当前建议|建议|结果|阻碍|当前情况)[：:]/g, "。$1：")
     .split(/[。！？；;]/)
     .map((part) => stripQuizOptionPrefix(part).trim())
     .filter(Boolean);
 }
 
-function compactMeaningText(text, fallback = "关注核心主题并做出清醒回应") {
+function cleanQuizFragment(text) {
+  return stripQuizOptionPrefix(text)
+    .replace(/^(你|自己)?正在/g, "正在")
+    .replace(/^(可以|适合|需要)?先/g, (match) => match === "先" ? "" : match)
+    .replace(/^不只是“?变坏”?，?/g, "")
+    .replace(/^不是单纯的?[^，,。；;]*[，,]/g, "")
+    .replace(/^更像是/g, "")
+    .replace(/^通常/g, "")
+    .replace(/^\s*[：:，,、。；;]\s*/, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function compactMeaningText(text, fallback = "关注核心主题并做出清醒回应", mode = "meaning") {
   const parts = splitMeaningParts(text)
     .flatMap((part) => part.split(/[，,]/))
-    .map((part) => stripQuizOptionPrefix(part).trim())
+    .flatMap((part) => part.split(/\s+或\s+|\s+和\s+|\s+与\s+/))
+    .map(cleanQuizFragment)
     .filter((part) => part && part.length >= 3);
-  const useful = parts.filter((part) => !/这是一张|牌面|大阿尔卡那|小阿尔卡那/.test(part));
-  const selected = (useful.length ? useful : parts).slice(0, 2);
-  const joined = selected.join("，");
-  if (!joined) return fallback;
-  if (joined.length <= 50) return joined;
-  const shorter = selected.map((part) => part.split(/[、]/).slice(0, 3).join("、")).join("，");
-  return shorter.length <= 50 ? shorter : fallback;
+  const banned = /这是一张|牌面|大阿尔卡那|小阿尔卡那|图像中|画面中|英文路径|中文系统路径/;
+  const useful = parts.filter((part) => !banned.test(part));
+  const candidates = useful.length ? useful : parts;
+  if (!candidates.length) return fallback;
+
+  const targetMin = mode === "keyword" ? 8 : 12;
+  const targetMax = mode === "keyword" ? 28 : 36;
+  let selected = [];
+  for (const part of candidates) {
+    const next = [...selected, part].join("、");
+    if (next.length > targetMax && selected.length) break;
+    selected.push(part);
+    if (next.length >= targetMin) break;
+  }
+  let joined = selected.join("、");
+  if (!joined || joined.length < 6) joined = candidates[0] || fallback;
+  if (joined.length > 50) {
+    const short = candidates.find((part) => part.length >= 6 && part.length <= 36);
+    joined = short || fallback;
+  }
+  return joined.length <= 50 ? joined : fallback;
 }
 
 function normalizeQuizOptionText(text, options = {}) {
   const { fallback = "关注核心主题并做出清醒回应", mode = "meaning" } = options;
-  const raw = getSafeText(text, fallback, 240);
-  let compact = compactMeaningText(raw, fallback)
+  const raw = getRawSafeText(text, fallback);
+  let compact = compactMeaningText(raw, fallback, mode)
+    .replace(/\.{3,}|…/g, "")
     .replace(/^不只是“变坏”，更?/g, "")
     .replace(/^更可能/g, "可能")
     .replace(/^代表/g, "")
@@ -1720,38 +1762,41 @@ function normalizeQuizOptionText(text, options = {}) {
     .replace(/^可能提醒更可能表示/g, "可能提醒")
     .replace(/^可能提醒不一定/g, "可能提醒情况不一定")
     .replace(/^可能提醒不只是“变坏”，?/g, "可能提醒")
-    .replace(/^需要/g, "需要")
+    .replace(/^需要需要/g, "需要")
     .replace(/、、+/g, "、")
     .trim();
-  compact = stripQuizOptionPrefix(compact);
-  compact = compact.replace(/^代表/g, "").replace(/^你需要代表/g, "你需要").replace(/、、+/g, "、").trim();
-  if (mode === "reversed" && !/^可能|需要|提醒|暗示/.test(compact)) {
+  compact = cleanQuizFragment(compact);
+  if (mode === "keyword") {
+    compact = compact
+      .split(/[，,、]/)
+      .map(cleanQuizFragment)
+      .filter(Boolean)
+      .slice(0, 4)
+      .join("、");
+  }
+  if (mode === "reversed" && !/^(可能|需要|提醒|暗示)/.test(compact)) {
     compact = `可能提醒${compact}`;
   }
   if (mode === "scenario" && !/^你/.test(compact)) {
     compact = `你需要${compact}`;
   }
-  compact = compact.replace(/\s+/g, " ").replace(/[。；;]+$/g, "").trim();
   compact = compact
+    .replace(/\s+/g, " ")
+    .replace(/[。；;]+$/g, "")
+    .replace(/\.{3,}|…/g, "")
     .replace(/^可能提醒更可能表示/g, "可能提醒")
     .replace(/^可能提醒可能表示/g, "可能提醒")
     .replace(/^可能提醒不只是“变坏”，?/g, "可能提醒")
     .trim();
   if (compact.length > 50) {
-    const parts = compact.split(/[，,、]/).map((part) => part.trim()).filter(Boolean);
-    let shortened = "";
-    for (const part of parts) {
-      const next = shortened ? `${shortened}、${part}` : part;
-      if (next.length > 50) break;
-      shortened = next;
-    }
-    compact = shortened || fallback;
+    compact = compactMeaningText(compact, fallback, mode);
   }
   return compact && compact.length >= 6 && compact.length <= 50 ? compact : fallback;
 }
 
-function sanitizeQuizOptionText(text, card = null) {
-  let cleaned = normalizeQuizOptionText(text, { fallback: "关注核心主题并做出清醒回应" });
+function sanitizeQuizOptionText(text, card = null, options = {}) {
+  const { mode = "meaning", fallback = "关注核心主题并做出清醒回应" } = options;
+  let cleaned = normalizeQuizOptionText(text, { mode, fallback });
   getAllCardNameTokens().forEach((name) => {
     cleaned = cleaned.replace(new RegExp(escapeRegExp(name), "gi"), "");
   });
@@ -1767,18 +1812,18 @@ function sanitizeQuizOptionText(text, card = null) {
     .replace(/\s+/g, " ")
     .replace(/([。！？；])\1+/g, "$1")
     .trim();
-  cleaned = normalizeQuizOptionText(cleaned, { fallback: "关注核心主题并做出清醒回应" });
+  cleaned = normalizeQuizOptionText(cleaned, { mode, fallback });
   if (!cleaned || cleaned.length < 6 || ["。", "，", "、"].includes(cleaned)) {
-    return "关注这组含义背后的核心能量。";
+    return fallback;
   }
   return cleaned;
 }
 
 function buildQuizOptions(correct, pools, fallbackPool = [], config = {}) {
-  const { allowCardNames = false, card = null } = config;
+  const { allowCardNames = false, card = null, mode = "meaning", fallback = "关注核心主题并做出清醒回应" } = config;
   const normalize = (item) => allowCardNames
     ? getSafeText(item, "待补充", 58)
-    : sanitizeQuizOptionText(item, card);
+    : sanitizeQuizOptionText(item, card, { mode, fallback });
   const answer = normalize(correct);
   const distractors = pools
     .flat()
@@ -2354,28 +2399,53 @@ function generateCardQuiz(card) {
       label: questionTypeLabels.keyword,
       question: "以下哪个关键词最符合这张牌？",
       answer: keyword,
-      options: buildQuizOptions(keyword, [otherKeywordOptions], [], { card })
+      options: buildQuizOptions(keyword, [otherKeywordOptions], [], {
+        card,
+        mode: "keyword",
+        fallback: "核心主题、能量变化、学习重点"
+      })
     },
     {
       type: "upright",
       label: questionTypeLabels.upright,
       question: "当这张牌正位出现时，它通常更强调什么？",
-      answer: sanitizeQuizOptionText(getCardUprightMeaning(card), card),
-      options: buildQuizOptions(getCardUprightMeaning(card), [otherCards.map(getCardUprightMeaning)], [], { card })
+      answer: sanitizeQuizOptionText(getCardUprightMeaning(card), card, {
+        mode: "upright",
+        fallback: "保持开放，理解当前主题并采取行动"
+      }),
+      options: buildQuizOptions(getCardUprightMeaning(card), [otherCards.map(getCardUprightMeaning)], [], {
+        card,
+        mode: "upright",
+        fallback: "保持开放，理解当前主题并采取行动"
+      })
     },
     {
       type: "reversed",
       label: questionTypeLabels.reversed,
       question: "当这张牌逆位出现时，它更可能提醒什么？",
-      answer: sanitizeQuizOptionText(getCardReversedMeaning(card), card),
-      options: buildQuizOptions(getCardReversedMeaning(card), [otherCards.map(getCardReversedMeaning)], [], { card })
+      answer: sanitizeQuizOptionText(getCardReversedMeaning(card), card, {
+        mode: "reversed",
+        fallback: "可能提醒能量受阻、内化或失衡"
+      }),
+      options: buildQuizOptions(getCardReversedMeaning(card), [otherCards.map(getCardReversedMeaning)], [], {
+        card,
+        mode: "reversed",
+        fallback: "可能提醒能量受阻、内化或失衡"
+      })
     },
     {
       type: "scenario",
       label: questionTypeLabels.scenario,
       question: "如果问题是“我最近的状态如何？”，这张牌更可能提示什么？",
-      answer: sanitizeQuizOptionText(cardSituationOption(card), card),
-      options: buildQuizOptions(cardSituationOption(card), [otherCards.map(cardSituationOption)], [], { card })
+      answer: sanitizeQuizOptionText(cardSituationOption(card), card, {
+        mode: "scenario",
+        fallback: "你需要观察当前状态，再做出清醒选择"
+      }),
+      options: buildQuizOptions(cardSituationOption(card), [otherCards.map(cardSituationOption)], [], {
+        card,
+        mode: "scenario",
+        fallback: "你需要观察当前状态，再做出清醒选择"
+      })
     }
   ];
 }
@@ -2404,12 +2474,15 @@ function generateReviewQuiz(card) {
     type: "reversed",
     label: "正逆位理解",
     question: "这张牌的正逆位理解，哪一项更合理？",
-    answer: sanitizeQuizOptionText(getCardReversedMeaning(card), card),
+    answer: sanitizeQuizOptionText(getCardReversedMeaning(card), card, {
+      mode: "reversed",
+      fallback: "可能提醒能量受阻、内化或失衡"
+    }),
     options: buildQuizOptions(
       getCardReversedMeaning(card),
       [tarotCards.filter((item) => item.id !== card.id).map(getCardReversedMeaning)],
       tarotCards.map(getCardUprightMeaning),
-      { card }
+      { card, mode: "reversed", fallback: "可能提醒能量受阻、内化或失衡" }
     )
   }, initial[4]];
 }
