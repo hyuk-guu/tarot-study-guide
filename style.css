@@ -1294,6 +1294,10 @@ textarea:focus {
   color: var(--cream);
   background: rgba(255, 252, 246, 0.64);
   padding: 12px;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  line-height: 1.45;
 }
 
 .quiz-option.correct {
