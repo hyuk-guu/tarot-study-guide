@@ -1947,10 +1947,6 @@ function isDetailedCard(card) {
   return Boolean(card && cardLearningData[card.name]);
 }
 
-function getCardStatus(card) {
-  return isDetailedCard(card) ? "已详解" : "待补充";
-}
-
 function getCardSystemLine(card) {
   return [card.arcanaZh || displayCardGroup(card.arcana), card.suitZh, card.elementZh || card.element, card.number ? `#${card.number}` : ""].filter(Boolean).join(" · ");
 }
