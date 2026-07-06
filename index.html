@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arcana Study | 塔罗学习手册</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="page-aura"></div>
+
+  <header class="site-header">
+    <nav class="navbar" aria-label="主导航">
+      <a class="brand" href="#dashboard" aria-label="Arcana Study 首页">
+        <span class="brand-mark">☾</span>
+        <span>秘仪学习 Arcana Study</span>
+      </a>
+      <div class="nav-links">
+        <a href="#dashboard">首页</a>
+        <a href="#knowledge">知识地图</a>
+        <a href="#cards">牌库</a>
+        <a href="#elements">元素</a>
+        <a href="#spreads">牌阵</a>
+        <a href="#colors">颜色</a>
+        <a href="#quiz">练习</a>
+        <a href="#ai-reading">AI 解读</a>
+        <a href="#journal">日志</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section id="dashboard" class="hero section">
+      <div class="hero-content">
+        <p class="eyebrow">✦ 月光下的学习桌</p>
+        <h1><span class="hero-title-lock">塔罗学习手册</span></h1>
+        <p class="hero-copy">一个用于学习塔罗牌义、符号、牌阵与每日练习的个人互动手册。</p>
+        <div class="hero-actions">
+          <button class="primary-btn" id="draw-card-btn" type="button">抽取今日牌</button>
+          <a class="ghost-btn" href="#cards">浏览牌库</a>
+        </div>
+      </div>
+
+      <div class="daily-panel">
+        <div class="moon-orbit" aria-hidden="true">
+          <span>✷</span>
+          <span>☾</span>
+          <span>✧</span>
+        </div>
+        <article class="daily-card" aria-live="polite">
+          <p class="panel-label">今日随机牌</p>
+          <h2 id="daily-card-name">月亮 The Moon</h2>
+          <p id="daily-card-keywords" class="keyword-line">直觉、梦境、阴影</p>
+          <p id="daily-card-meaning">聆听表象之下更真实的声音。</p>
+          <button id="daily-card-detail" class="secondary-btn" type="button">查看详情</button>
+        </article>
+      </div>
+    </section>
+
+    <section class="section dashboard-grid" aria-label="学习首页">
+      <article class="progress-card">
+        <div class="section-heading compact">
+          <p class="eyebrow">当前学习进度</p>
+          <h2>18%</h2>
+        </div>
+        <div id="progress-list" class="progress-list" aria-label="分模块学习进度">
+          <div class="progress-row">
+            <span class="progress-name">大阿尔卡那</span>
+            <div class="progress-track" aria-label="大阿尔卡那学习进度：22%">
+              <span style="width: 22%"></span>
+            </div>
+            <strong>22%</strong>
+          </div>
+          <div class="progress-row">
+            <span class="progress-name">小牌数字</span>
+            <div class="progress-track" aria-label="小牌数字学习进度：18%">
+              <span style="width: 18%"></span>
+            </div>
+            <strong>18%</strong>
+          </div>
+          <div class="progress-row">
+            <span class="progress-name">牌阵练习</span>
+            <div class="progress-track" aria-label="牌阵练习学习进度：14%">
+              <span style="width: 14%"></span>
+            </div>
+            <strong>14%</strong>
+          </div>
+        </div>
+        <p id="progress-summary">每次认识一张牌，慢慢建立属于自己的符号语言。</p>
+        <div id="daily-review-panel" class="daily-review-panel" aria-live="polite"></div>
+      </article>
+
+      <div class="quick-links" aria-label="快速入口">
+        <a href="#cards" class="quick-card">
+          <span>✦</span>
+          <strong>大阿尔卡那</strong>
+          <small>原型与人生转折</small>
+        </a>
+        <a href="#cards" class="quick-card">
+          <span>✧</span>
+          <strong>小阿尔卡那</strong>
+          <small>日常事件与现实变化</small>
+        </a>
+        <a href="#elements" class="quick-card">
+          <span>△</span>
+          <strong>四元素</strong>
+          <small>火、水、风、土</small>
+        </a>
+        <a href="#spreads" class="quick-card">
+          <span>✷</span>
+          <strong>牌阵</strong>
+          <small>问题的结构</small>
+        </a>
+        <a href="#journal" class="quick-card">
+          <span>☽</span>
+          <strong>日志</strong>
+          <small>你的本地学习记录</small>
+        </a>
+      </div>
+    </section>
+
+    <section id="knowledge" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">知识地图</p>
+        <h2>塔罗学习体系</h2>
+        <p>展开每一张卡片，把阿尔卡那、花色、数字、宫廷牌、逆位与牌阵串联起来。</p>
+      </div>
+      <div id="knowledge-grid" class="card-grid"></div>
+      <article id="system-detail" class="system-detail-panel detail-panel" aria-live="polite"></article>
+    </section>
+
+    <section id="cards" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">牌库</p>
+        <h2>可扩展塔罗牌库</h2>
+        <p>当前优先加载远程韦特牌图；若图片加载失败或超时，系统会显示复古占位牌面。</p>
+      </div>
+
+      <div class="library-controls">
+        <label class="search-wrap">
+          <span>搜索</span>
+          <input id="card-search" type="search" placeholder="试试：月亮、冲突、直觉...">
+        </label>
+        <div class="filter-buttons" id="card-filters" aria-label="牌库筛选">
+          <button class="filter-btn active" type="button" data-filter="All">全部</button>
+          <button class="filter-btn" type="button" data-filter="Major">大牌</button>
+          <button class="filter-btn" type="button" data-filter="Minor">小牌</button>
+          <button class="filter-btn" type="button" data-filter="Wands">权杖</button>
+          <button class="filter-btn" type="button" data-filter="Cups">圣杯</button>
+          <button class="filter-btn" type="button" data-filter="Swords">宝剑</button>
+          <button class="filter-btn" type="button" data-filter="Pentacles">星币</button>
+          <button class="filter-btn" type="button" data-filter="Fire">火元素</button>
+          <button class="filter-btn" type="button" data-filter="Water">水元素</button>
+          <button class="filter-btn" type="button" data-filter="Air">风元素</button>
+          <button class="filter-btn" type="button" data-filter="Earth">土元素</button>
+        </div>
+      </div>
+      <div id="cards-grid" class="tarot-grid"></div>
+    </section>
+
+    <section id="elements" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">元素</p>
+        <h2>元素与花色</h2>
+        <p>点击元素卡片，查看它对应的气质、花色与学习提示。</p>
+      </div>
+      <div id="elements-grid" class="element-grid"></div>
+      <article id="element-detail" class="detail-panel" aria-live="polite"></article>
+    </section>
+
+    <section id="numbers" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">数字 1-10</p>
+        <h2>小阿尔卡那数字系统</h2>
+        <p>选择一个数字，查看它的核心主题，以及在四个花色中的不同表现。</p>
+      </div>
+      <div id="number-buttons" class="number-buttons"></div>
+      <article id="number-detail" class="detail-panel" aria-live="polite"></article>
+    </section>
+
+    <section id="spreads" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">牌阵</p>
+        <h2>练习牌阵</h2>
+        <p>展开牌阵说明，尝试布局，并用示例牌随机填充牌位。</p>
+      </div>
+      <div id="spreads-grid" class="spread-grid"></div>
+      <article class="spread-playground">
+        <div class="playground-head">
+          <div>
+            <p class="panel-label">当前牌阵</p>
+            <h3 id="active-spread-title">选择一个牌阵开始</h3>
+          </div>
+          <button id="random-fill-btn" class="secondary-btn" type="button" disabled>随机填牌</button>
+        </div>
+        <div id="spread-slots" class="spread-slots"></div>
+      </article>
+    </section>
+
+    <section id="colors" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">颜色</p>
+        <h2>颜色象征</h2>
+        <p>通过观察图像中的颜色，理解牌面场景正在表达什么。</p>
+      </div>
+      <div id="color-grid" class="color-grid"></div>
+      <article id="color-detail" class="detail-panel" aria-live="polite"></article>
+    </section>
+
+    <section id="quiz" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">练习</p>
+        <h2>五题学习小测</h2>
+        <p>回答问题，并在最后查看你的分数。</p>
+      </div>
+      <article class="quiz-panel">
+        <div id="quiz-content"></div>
+        <div class="quiz-footer">
+          <p id="quiz-feedback" aria-live="polite"></p>
+          <button id="restart-quiz-btn" class="secondary-btn" type="button">重新开始</button>
+        </div>
+      </article>
+    </section>
+
+    <section id="ai-reading" class="section tarot-lens">
+      <div class="section-heading">
+        <p class="eyebrow">AI 解读</p>
+        <h2>塔罗镜 Tarot Lens</h2>
+        <p>上传你的塔罗牌阵照片，写下问题，并获得一份结构化的模拟解读。</p>
+      </div>
+
+      <div class="lens-layout">
+        <div class="lens-workbench">
+          <label class="upload-card" for="lens-upload">
+            <input id="lens-upload" type="file" accept="image/*" capture="environment">
+            <span class="upload-icon">☾</span>
+            <strong>上传或拍摄你的塔罗牌阵</strong>
+            <small>请尽量在光线充足的环境中拍清所有牌。</small>
+            <img id="lens-preview" alt="已上传的塔罗牌阵预览">
+          </label>
+
+          <label class="lens-field">
+            <span>你的问题</span>
+            <textarea id="lens-question" rows="4" placeholder="你想向牌询问什么？"></textarea>
+          </label>
+
+          <div class="lens-group">
+            <p class="panel-label">问题类型</p>
+            <div id="lens-type-chips" class="chip-row" aria-label="问题类型"></div>
+          </div>
+
+          <div class="lens-group">
+            <p class="panel-label">牌阵</p>
+            <div id="lens-spread-cards" class="lens-spread-grid" aria-label="Tarot Lens 牌阵"></div>
+            <article id="lens-spread-detail" class="mini-detail" aria-live="polite"></article>
+          </div>
+
+          <div class="lens-actions">
+            <button id="analyze-reading-btn" class="primary-btn" type="button">开始解读</button>
+            <button id="reset-reading-btn" class="secondary-btn" type="button">分析另一张照片</button>
+          </div>
+          <p id="lens-message" class="lens-message" aria-live="polite"></p>
+        </div>
+
+        <div class="lens-results">
+          <article id="lens-loading" class="lens-loading" hidden>
+            <span class="spinner" aria-hidden="true"></span>
+            <p id="lens-loading-text">正在读取图片...</p>
+          </article>
+
+          <article class="detected-panel">
+            <div class="playground-head">
+              <div>
+                <p class="panel-label">模拟识别结果</p>
+                <h3>识别到的牌</h3>
+              </div>
+            </div>
+            <div id="detected-cards" class="detected-cards"></div>
+          </article>
+
+          <article class="interpretation-panel">
+            <div class="playground-head">
+              <div>
+                <p class="panel-label">Tarot Lens — AI 牌面解读</p>
+                <h3>结构化解读</h3>
+              </div>
+              <button id="save-reading-btn" class="secondary-btn" type="button" disabled>保存到日志</button>
+            </div>
+            <div id="lens-interpretation" class="interpretation-grid"></div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="journal" class="section">
+      <div class="section-heading">
+        <p class="eyebrow">日志</p>
+        <h2>学习笔记 / 抽牌记录</h2>
+        <p>记录会通过 localStorage 保存在当前浏览器中。</p>
+      </div>
+      <div class="journal-layout">
+        <form id="journal-form" class="journal-form">
+          <label>
+            <span>日期</span>
+            <input id="entry-date" type="date" required>
+          </label>
+          <label>
+            <span>问题</span>
+            <input id="entry-question" type="text" placeholder="我能从这件事中学习什么？" required>
+          </label>
+          <label>
+            <span>抽到的牌</span>
+            <input id="entry-card" type="text" placeholder="星星 The Star" required>
+          </label>
+          <label>
+            <span>我的解读</span>
+            <textarea id="entry-interpretation" rows="6" placeholder="符号、感受、背景，以及下一步行动..." required></textarea>
+          </label>
+          <button class="primary-btn" type="submit">保存记录</button>
+        </form>
+        <div>
+          <div class="journal-head">
+            <h3>已保存记录</h3>
+            <span id="entry-count">0</span>
+          </div>
+          <div id="journal-list" class="journal-list"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>☾ Arcana Study · 个人塔罗学习空间 · 记录保存在你的浏览器本地</p>
+  </footer>
+
+  <div id="card-modal" class="modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-backdrop" data-close-modal></div>
+    <article class="modal-card">
+      <button class="modal-close" type="button" data-close-modal aria-label="关闭牌面详情">×</button>
+      <p id="modal-subtitle" class="panel-label"></p>
+      <h2 id="modal-title" class="bilingual-title"></h2>
+      <div id="modal-keywords" class="tag-row"></div>
+      <div id="modal-system-path" class="system-path-card"></div>
+      <section id="modal-learning-status" class="card-learning-status" aria-live="polite"></section>
+      <section id="modal-card-quiz" class="card-quiz-panel" aria-live="polite"></section>
+      <div id="modal-image" class="modal-image-slot"></div>
+      <section id="modal-overview" class="visual-reading-block"></section>
+      <section class="visual-reading-block">
+        <h3>牌面图像解读</h3>
+        <ul id="modal-visual-reading"></ul>
+      </section>
+      <section class="visual-reading-block">
+        <h3>颜色解读</h3>
+        <p id="modal-color-reading"></p>
+      </section>
+      <section class="visual-reading-block">
+        <h3>正位含义</h3>
+        <div id="modal-upright" class="learning-section-list"></div>
+      </section>
+      <section class="visual-reading-block">
+        <h3>逆位含义</h3>
+        <div id="modal-reversed" class="learning-section-list"></div>
+      </section>
+      <section class="visual-reading-block">
+        <h3>牌阵中读法</h3>
+        <div id="modal-spread-reading" class="learning-section-list"></div>
+      </section>
+      <section class="visual-reading-block">
+        <h3>学习问题</h3>
+        <ul id="modal-study-questions"></ul>
+      </section>
+      <section id="modal-related" class="visual-reading-block"></section>
+    </article>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
