@@ -14,6 +14,10 @@ function initTarotLens() {
   byId("save-reading-btn").addEventListener("click", saveLensReadingToJournal);
 }
 
+function getLensManualText() {
+  return byId("lens-manual-cards")?.value.trim() || "";
+}
+
 function renderTarotCardDatalist() {
   const options = tarotCards.map((card) => `<option value="${escapeHtml(card.name)}">${escapeHtml(card.zhName)} / ${escapeHtml(card.nameEn)} / ${escapeHtml(getCardSystemLine(card))} / ${escapeHtml([...(card.keywordsZh || []), ...(card.keywordsEn || [])].join(" "))}</option>`).join("");
   const existing = document.getElementById("tarot-card-options");
@@ -90,8 +94,9 @@ function setLensLoading(isLoading) {
 
 function analyzeLensReading() {
   const question = byId("lens-question").value.trim();
-  if (!lensState.imageData) {
-    setLensMessage("请先上传或拍摄一张塔罗牌阵照片。");
+  const manualText = getLensManualText();
+  if (!lensState.imageData && !manualText) {
+    setLensMessage("请先上传照片，或用文字描述你抽到的牌面。");
     return;
   }
   if (!question) {
@@ -100,8 +105,8 @@ function analyzeLensReading() {
   }
 
   const loadingLines = [
-    "正在读取图片...",
-    "正在识别牌面...",
+    "正在读取牌面信息...",
+    "正在整理牌阵线索...",
     "正在把符号与你的问题连接起来..."
   ];
   let loadingIndex = 0;
@@ -115,7 +120,7 @@ function analyzeLensReading() {
 
   window.setTimeout(() => {
     window.clearInterval(loadingTimer);
-    lensState.detectedCards = generateDetectedCards();
+    lensState.detectedCards = generateDetectedCards(manualText);
     lensState.interpretation = generateLensInterpretation(question);
     setLensLoading(false);
     setLensMessage("模拟解读完成。你可以检查识别结果，并手动修正不准确的牌。");
@@ -125,11 +130,27 @@ function analyzeLensReading() {
   }, 1050);
 }
 
-function generateDetectedCards() {
+function parseManualDetectedCards(text) {
+  const source = String(text || "").toLowerCase();
+  if (!source) return [];
+  const matched = [];
+  tarotCards.forEach((card) => {
+    const tokens = [card.zhName, card.nameEn, card.name].filter(Boolean);
+    if (tokens.some((token) => source.includes(String(token).toLowerCase()))) {
+      matched.push(card);
+    }
+  });
+  return matched;
+}
+
+function generateDetectedCards(manualText = "") {
   const selectedSpread = getSelectedLensSpread();
+  const manualCards = parseManualDetectedCards(manualText);
   return selectedSpread.positions.map((position) => {
-    const card = randomItem(tarotCards);
-    const orientation = Math.random() > 0.28 ? "upright" : "reversed";
+    const card = manualCards.shift() || randomItem(tarotCards);
+    const textAroundCard = manualText.toLowerCase();
+    const hasReversed = textAroundCard.includes(`${card.zhName} 逆位`.toLowerCase()) || textAroundCard.includes(`${card.nameEn} reversed`.toLowerCase());
+    const orientation = hasReversed ? "reversed" : (Math.random() > 0.28 ? "upright" : "reversed");
     return {
       id: makeId(),
       position,
@@ -268,6 +289,7 @@ function saveLensReadingToJournal() {
     question,
     questionType: lensState.questionType,
     spread: lensState.spreadName,
+    manualText: getLensManualText(),
     imageData: lensState.imageData,
     detectedCards: lensState.detectedCards,
     interpretation: lensState.interpretation
@@ -290,6 +312,7 @@ function resetLensReading() {
   byId("lens-upload").value = "";
   byId("lens-preview").removeAttribute("src");
   byId("lens-question").value = "";
+  if (byId("lens-manual-cards")) byId("lens-manual-cards").value = "";
   document.querySelector(".upload-card").classList.remove("has-image");
   byId("save-reading-btn").disabled = true;
   setLensLoading(false);

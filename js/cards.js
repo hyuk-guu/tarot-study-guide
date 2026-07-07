@@ -300,21 +300,185 @@ function renderNumbers() {
   showNumberDetail("1");
 }
 
+const numberStudyDetails = {
+  "1": {
+    theme: "开始 / 种子 / 潜能",
+    summary: "数字 1 是一股刚出现的能量，还没有稳定形状，但已经带来方向、机会或冲动。",
+    suits: {
+      权杖: "新的行动火花、灵感、想开始做某件事。",
+      圣杯: "新的情绪流动、心动、直觉或关系可能。",
+      宝剑: "新的想法、判断、真相意识或沟通开端。",
+      星币: "新的资源、现实机会、身体或金钱层面的种子。"
+    },
+    tip: "读 1 时先问：这股能量刚从哪里出现？它需要被接住，还是需要先观察？",
+    confusion: "不要把 1 直接读成完成。它更像机会的入口，而不是已经成形的结果。",
+    related: "四张 Ace、愚人、魔术师",
+    question: "我现在真正想开始的是什么？"
+  },
+  "2": {
+    theme: "选择 / 平衡 / 伙伴关系",
+    summary: "数字 2 把一个能量带进关系、对照和选择中，重点是两方之间是否能回应。",
+    suits: {
+      权杖: "两个方向、未来规划、是否走出舒适区。",
+      圣杯: "情感回应、互相承认、关系开始建立。",
+      宝剑: "左右为难、暂时不表态、需要清楚判断。",
+      星币: "现实事务的协调、时间和资源的平衡。"
+    },
+    tip: "读 2 时观察双方是否平等：是合作、拉扯，还是拖延选择？",
+    confusion: "2 不一定代表稳定关系，也可能代表犹豫、摇摆或刚出现的对照。",
+    related: "圣杯二、宝剑二、星币二、恋人",
+    question: "这件事里有哪些两难或需要回应的关系？"
+  },
+  "3": {
+    theme: "成长 / 合作 / 表达",
+    summary: "数字 3 让能量开始外显，进入表达、扩展、合作或结果初步成形的阶段。",
+    suits: {
+      权杖: "远方计划、扩展视野、等待行动后的回响。",
+      圣杯: "庆祝、友情、情感支持和共同喜悦。",
+      宝剑: "痛感被说出，事实或语言刺破情绪防线。",
+      星币: "合作工作、技能被看见、共同搭建成果。"
+    },
+    tip: "读 3 时看能量如何被表达出来：是创造、合作，还是伤口显现？",
+    confusion: "3 的成长不总是快乐的，也可能是问题终于显形。",
+    related: "圣杯三、宝剑三、星币三、权杖三",
+    question: "现在有什么东西已经不再只是想法，而开始显现？"
+  },
+  "4": {
+    theme: "结构 / 稳定 / 限制",
+    summary: "数字 4 带来框架、安全感和边界，也可能带来僵硬、保守或停滞。",
+    suits: {
+      权杖: "庆祝稳定、家庭或阶段性安顿。",
+      圣杯: "情绪停滞、无聊、对机会缺少回应。",
+      宝剑: "休息、暂停、让头脑恢复秩序。",
+      星币: "守住资源、安全感、控制和占有。"
+    },
+    tip: "读 4 时问：这个结构是在保护我，还是限制我？",
+    confusion: "稳定不等于停滞；限制也不一定坏，关键是它是否仍然有用。",
+    related: "星币四、权杖四、宝剑四、皇帝",
+    question: "我现在需要更多安全感，还是需要松动旧框架？"
+  },
+  "5": {
+    theme: "冲突 / 改变 / 不稳定",
+    summary: "数字 5 是稳定结构被打扰后的阶段，带来摩擦、损失、竞争或价值冲突。",
+    suits: {
+      权杖: "意见碰撞、竞争、行动能量分散。",
+      圣杯: "失落、后悔、注意力停在已经失去的部分。",
+      宝剑: "冲突后的代价、输赢之外的关系损伤。",
+      星币: "匮乏感、现实困难、需要寻求支持。"
+    },
+    tip: "读 5 时不要只看混乱，也要看它正在逼迫什么改变。",
+    confusion: "5 不是结局，而是过渡期。它常常暴露旧方式已经不够用。",
+    related: "圣杯五、宝剑五、星币五、塔",
+    question: "这个冲突想让我调整什么？"
+  },
+  "6": {
+    theme: "和谐 / 调整 / 疗愈",
+    summary: "数字 6 进入修复和平衡阶段，试图让关系、资源或内在状态重新顺畅。",
+    suits: {
+      权杖: "被认可、阶段性胜利、行动获得回应。",
+      圣杯: "回忆、纯真、旧关系或情感修复。",
+      宝剑: "离开混乱、过渡到更平静的地方。",
+      星币: "给予与接受、资源分配、现实互助。"
+    },
+    tip: "读 6 时看能量如何恢复：被支持、被承认，还是正在过渡？",
+    confusion: "6 的和谐不是永久完美，而是从失衡中找到下一步调整。",
+    related: "圣杯六、宝剑六、星币六、恋人",
+    question: "哪里需要重新分配、修复或温柔过渡？"
+  },
+  "7": {
+    theme: "挑战 / 信念 / 策略",
+    summary: "数字 7 常常带来考验，需要信念、策略、耐心或重新辨认真相。",
+    suits: {
+      权杖: "守住立场、面对挑战和压力。",
+      圣杯: "选择太多、幻想、欲望和投射。",
+      宝剑: "策略、隐瞒、绕路或不完全诚实。",
+      星币: "等待成果、评估投入和长期价值。"
+    },
+    tip: "读 7 时问：我是在坚持、幻想、策略，还是等待？",
+    confusion: "7 不是单纯失败，它更像信念和方法被测试。",
+    related: "圣杯七、宝剑七、星币七、战车",
+    question: "我需要更坚定，还是需要更诚实地评估？"
+  },
+  "8": {
+    theme: "移动 / 力量 / 掌握",
+    summary: "数字 8 让能量进入推进、重复练习、限制突破或力量整合。",
+    suits: {
+      权杖: "快速推进、消息、行动加速。",
+      圣杯: "离开不再滋养的情绪场域。",
+      宝剑: "心理限制、被想法困住、需要看见出口。",
+      星币: "练习、技能、稳定投入和打磨。"
+    },
+    tip: "读 8 时看：能量是在前进、离开、受限，还是通过练习成熟？",
+    confusion: "8 的力量不一定外放，也可能表现为持续劳动或突破内在限制。",
+    related: "宝剑八、星币八、权杖八、力量",
+    question: "我现在需要推进、离开、练习，还是解开限制？"
+  },
+  "9": {
+    theme: "成熟 / 独处 / 接近完成",
+    summary: "数字 9 接近一个周期的成熟点，带来积累、独处、愿望实现或心理压力。",
+    suits: {
+      权杖: "疲惫但仍防守，经验让人谨慎。",
+      圣杯: "愿望满足、情绪上的自足和享受。",
+      宝剑: "焦虑、失眠、反复思考带来的压力。",
+      星币: "独立、丰盛、长期经营后的自我价值。"
+    },
+    tip: "读 9 时观察：这是成熟的独处，还是快到终点前的压力？",
+    confusion: "9 不是最终完成，它常常还有最后一段整理或面对。",
+    related: "圣杯九、宝剑九、星币九、隐士",
+    question: "我已经积累了什么？还有什么需要独自面对？"
+  },
+  "10": {
+    theme: "完成 / 负担 / 周期结束",
+    summary: "数字 10 是一个周期的终点，也暗示旧能量需要释放，进入下一轮。",
+    suits: {
+      权杖: "责任过重、负担累积，需要分担或收尾。",
+      圣杯: "情感圆满、家庭愿景、共同幸福图景。",
+      宝剑: "痛苦见底、某种叙事或阶段结束。",
+      星币: "长期成果、家族资源、稳定结构和传承。"
+    },
+    tip: "读 10 时问：这是圆满完成，还是旧周期已经太重？",
+    confusion: "10 不只是成功，也可能是负担到顶点，提醒你进入新循环。",
+    related: "圣杯十、权杖十、宝剑十、世界",
+    question: "这个周期该如何收尾，才能进入下一阶段？"
+  }
+};
+
 function showNumberDetail(number) {
   document.querySelectorAll(".number-btn").forEach((button) => {
     button.classList.toggle("active", button.dataset.number === number);
   });
 
   const meaning = numberMeanings.find(([value]) => value === number)[1];
+  const detail = numberStudyDetails[number] || {
+    theme: meaning,
+    summary: "这个数字展示小阿尔卡那中能量发展的一个阶段。",
+    suits: {
+      权杖: "行动与创造层面的表现。",
+      圣杯: "情绪与关系层面的表现。",
+      宝剑: "思维与沟通层面的表现。",
+      星币: "现实与资源层面的表现。"
+    },
+    tip: "把数字含义和花色元素放在一起读。",
+    confusion: "不要脱离牌面图像和问题背景单独读数字。",
+    related: "同数字的四张小牌",
+    question: "这个数字在当前问题里如何显现？"
+  };
   const entry = findSystemEntry(number === "1" ? "Ace / 1" : `数字 ${number}`);
   byId("number-detail").innerHTML = `
     <p class="panel-label">数字 ${number}</p>
-    <h3>${meaning}</h3>
-    <div class="suit-list">
-      <div><strong>权杖 Wands</strong><p>这个数字如何表现为动力、创造、野心或行动。</p></div>
-      <div><strong>圣杯 Cups</strong><p>这个数字如何表现为情绪、联结、直觉或渴望。</p></div>
-      <div><strong>宝剑 Swords</strong><p>这个数字如何表现为想法、真相、冲突或沟通。</p></div>
-      <div><strong>星币 Pentacles</strong><p>这个数字如何表现为金钱、身体、工作、习惯或稳定。</p></div>
+    <h3>${escapeHtml(detail.theme || meaning)}</h3>
+    <p>${escapeHtml(detail.summary)}</p>
+    <div class="suit-list number-suit-list">
+      <div><strong>权杖 Wands</strong><p>${escapeHtml(detail.suits.权杖)}</p></div>
+      <div><strong>圣杯 Cups</strong><p>${escapeHtml(detail.suits.圣杯)}</p></div>
+      <div><strong>宝剑 Swords</strong><p>${escapeHtml(detail.suits.宝剑)}</p></div>
+      <div><strong>星币 Pentacles</strong><p>${escapeHtml(detail.suits.星币)}</p></div>
+    </div>
+    <div class="number-study-grid">
+      <section><strong>学习提示</strong><p>${escapeHtml(detail.tip)}</p></section>
+      <section><strong>容易混淆</strong><p>${escapeHtml(detail.confusion)}</p></section>
+      <section><strong>相关牌</strong><p>${escapeHtml(detail.related)}</p></section>
+      <section><strong>练习问题</strong><p>${escapeHtml(detail.question)}</p></section>
     </div>
     ${entry ? `<div class="inline-system-detail">${renderSystemEntryDetail(entry)}</div>` : ""}
   `;

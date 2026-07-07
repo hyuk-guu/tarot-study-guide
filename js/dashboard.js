@@ -155,12 +155,17 @@ function startNextDueReview() {
 }
 
 function drawDailyCard() {
-  const card = randomItem(tarotCards);
+  const dailyPool = tarotCards.filter((card) => card.arcana === "Major" || card.suitZh === "权杖");
+  const card = randomItem(dailyPool.length ? dailyPool : tarotCards);
   currentDailyCard = card;
+  const imageSlot = byId("daily-card-image");
+  if (imageSlot) {
+    imageSlot.innerHTML = renderCardImage(card, "large");
+    hydrateCardImages(imageSlot);
+  }
   byId("daily-card-name").innerHTML = `<span class="card-name-zh">${escapeHtml(card.zhName)}</span><span class="card-name-en">${escapeHtml(card.nameEn)}</span>`;
   byId("daily-card-keywords").textContent = (card.keywordsZh || card.keywords || []).join("、");
   byId("daily-card-meaning").textContent = isDetailedCard(card)
     ? card.coreThemeZh
     : `${getCardSystemLine(card)}。完整解析待补充。`;
 }
-

@@ -1222,6 +1222,25 @@ textarea:focus {
   background: rgba(255, 255, 255, 0.38);
 }
 
+.number-study-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.number-study-grid section {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 14px;
+  background: rgba(246, 236, 214, 0.48);
+}
+
+.number-study-grid strong,
+.number-suit-list strong {
+  color: var(--gold);
+}
+
 .spread-grid {
   grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
 }
@@ -1407,8 +1426,7 @@ textarea:focus {
 
 .lens-layout {
   display: grid;
-  grid-template-columns: minmax(280px, 0.85fr) minmax(0, 1.15fr);
-  gap: 18px;
+  gap: 22px;
   align-items: start;
 }
 
@@ -1416,6 +1434,45 @@ textarea:focus {
 .lens-results {
   display: grid;
   gap: 16px;
+}
+
+.lens-workbench {
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 0.82fr);
+  align-items: stretch;
+}
+
+.lens-workbench > .lens-field:first-of-type {
+  grid-column: 1 / -1;
+}
+
+.lens-workbench .manual-reading-card,
+.lens-workbench .upload-card {
+  min-height: 300px;
+}
+
+.manual-reading-card {
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+}
+
+.manual-reading-card textarea {
+  min-height: 190px;
+}
+
+.manual-reading-card small {
+  color: var(--muted);
+}
+
+.lens-workbench .lens-group,
+.lens-workbench .lens-actions,
+.lens-workbench .lens-message {
+  grid-column: 1 / -1;
+}
+
+.lens-results {
+  grid-template-columns: minmax(280px, 0.9fr) minmax(0, 1.1fr);
 }
 
 .upload-card {
@@ -2193,33 +2250,28 @@ textarea {
 }
 
 .daily-card::after {
-  content: "XVII\A ✦\A THE STAR";
-  white-space: pre;
+  content: none;
+}
+
+.daily-card-image {
   position: absolute;
   left: clamp(70px, 8vw, 120px);
   top: 50%;
-  width: 166px;
-  height: 270px;
+  width: 174px;
   transform: translateY(-50%);
-  display: grid;
-  place-items: center;
-  padding: 28px 18px;
-  border: 8px solid #092039;
-  border-radius: 12px;
-  background:
-    radial-gradient(circle at 50% 46%, #e5c454 0 9%, transparent 10%),
-    radial-gradient(circle at 22% 55%, #bf9b46 0 2px, transparent 3px),
-    radial-gradient(circle at 72% 35%, #bf9b46 0 2px, transparent 3px),
-    linear-gradient(#0b2c4b, #08213a);
-  color: var(--gold-bright);
-  font-size: 0.9rem;
-  line-height: 5.4;
-  letter-spacing: 0.35em;
-  text-align: center;
-  box-shadow: 0 16px 34px rgba(20, 10, 4, 0.18);
+  z-index: 1;
+}
+
+.daily-card-image .tarot-image-frame.large {
+  width: 100%;
+  margin: 0;
+  border-radius: 14px;
+  box-shadow: 0 18px 36px rgba(20, 10, 4, 0.2);
 }
 
 .daily-card h2 {
+  position: relative;
+  z-index: 2;
   font-size: clamp(3.1rem, 5.4vw, 5.2rem);
   line-height: 1;
   letter-spacing: 0.1em;
@@ -2227,18 +2279,26 @@ textarea {
   font-weight: 500;
 }
 
-.daily-card .card-name-en,
-.daily-card .card-name-zh {
+.daily-card h2 .card-name-en,
+.daily-card h2 .card-name-zh {
   color: var(--cream);
   font-size: inherit;
   font-weight: 500;
 }
 
-.daily-card .card-name-zh {
+.daily-card .panel-label,
+.daily-card .keyword-line,
+.daily-card #daily-card-meaning,
+.daily-card .secondary-btn {
+  position: relative;
+  z-index: 2;
+}
+
+.daily-card h2 .card-name-zh {
   font-size: clamp(2.1rem, 4.8vw, 4.2rem);
 }
 
-.daily-card .card-name-en {
+.daily-card h2 .card-name-en {
   margin-top: 10px;
   color: var(--gold);
   font-size: clamp(1rem, 1.6vw, 1.4rem);
@@ -2492,14 +2552,14 @@ textarea {
 
 @media (min-width: 1080px) {
   body {
-    padding-left: 280px;
+    padding-left: 248px;
   }
 
   .site-header {
     position: fixed;
     inset: 0 auto 0 0;
     z-index: 40;
-    width: 280px;
+    width: 248px;
     min-height: 100vh;
   }
 
@@ -2507,28 +2567,22 @@ textarea {
     width: 100%;
     min-height: 100vh;
     margin: 0;
-    padding: 58px 24px 34px;
+    padding: 42px 18px 28px;
     flex-direction: column;
     align-items: stretch;
     justify-content: flex-start;
-    gap: 46px;
+    gap: 26px;
   }
 
   .navbar::before {
     content: "";
-    height: 1px;
+    display: none;
     background: rgba(208, 172, 75, 0.12);
     order: 1;
   }
 
   .navbar::after {
-    content: "◎  个人学习空间\A 7-day streak ✦";
-    white-space: pre;
-    margin-top: auto;
-    padding: 26px 10px 0;
-    border-top: 1px solid rgba(208, 172, 75, 0.18);
-    color: var(--gold);
-    line-height: 1.8;
+    content: none;
   }
 
   .brand {
@@ -2538,11 +2592,11 @@ textarea {
   .nav-links {
     order: 2;
     display: grid;
-    gap: 14px;
+    gap: 8px;
   }
 
   .nav-links a {
-    padding: 14px 18px;
+    padding: 11px 14px;
     border-color: transparent;
     border-radius: 8px;
   }
@@ -2614,6 +2668,13 @@ textarea {
     transform: translateX(-50%);
   }
 
+  .daily-card-image {
+    top: 42px;
+    left: 50%;
+    width: 148px;
+    transform: translateX(-50%);
+  }
+
   .quick-links {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -2671,6 +2732,16 @@ textarea {
 
   .tarot-grid {
     grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  }
+
+  .lens-workbench,
+  .lens-results {
+    grid-template-columns: 1fr;
+  }
+
+  .lens-workbench > *,
+  .lens-results > * {
+    grid-column: auto;
   }
 }
 

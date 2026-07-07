@@ -48,6 +48,7 @@
           <span>✧</span>
         </div>
         <article class="daily-card" aria-live="polite">
+          <div id="daily-card-image" class="daily-card-image"></div>
           <p class="panel-label">今日随机牌</p>
           <h2 id="daily-card-name">月亮 The Moon</h2>
           <p id="daily-card-keywords" class="keyword-line">直觉、梦境、阴影</p>
@@ -248,12 +249,19 @@
             <span class="upload-icon">☾</span>
             <strong>上传或拍摄你的塔罗牌阵</strong>
             <small>请尽量在光线充足的环境中拍清所有牌。</small>
+            <small>照片识别为模拟功能；当前版本可用于记录牌面，不会自动识别真实牌名。</small>
             <img id="lens-preview" alt="已上传的塔罗牌阵预览">
           </label>
 
           <label class="lens-field">
             <span>你的问题</span>
             <textarea id="lens-question" rows="4" placeholder="你想向牌询问什么？"></textarea>
+          </label>
+
+          <label class="lens-field manual-reading-card">
+            <span>文字描述牌面</span>
+            <textarea id="lens-manual-cards" rows="7" placeholder="例如：过去：圣杯六 正位；现在：宝剑二 逆位；未来：星币八 正位。问题背景是……"></textarea>
+            <small>适合没有照片时手动记录牌阵；系统会优先根据文字中出现的牌名生成模拟解读。</small>
           </label>
 
           <div class="lens-group">

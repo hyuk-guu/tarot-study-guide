@@ -257,10 +257,10 @@ function generateQuizQuestions() {
   const cards = [...tarotCards].sort(() => Math.random() - 0.5);
   const q = [];
   const c1 = cards[0], c2 = cards[1], c3 = cards[2], c4 = cards[3], c5 = cards.find((card) => card.keywordsZh?.length) || cards[4];
-  q.push({ question: `${c1.zhName} 的英文名是？`, options: uniqueOptions(c1.nameEn, tarotCards.map((card) => card.nameEn)), answer: c1.nameEn });
-  q.push({ question: `${c2.nameEn} 的中文名是？`, options: uniqueOptions(c2.zhName, tarotCards.map((card) => card.zhName)), answer: c2.zhName });
-  q.push({ question: `${c3.zhName} 对应哪个元素？`, options: uniqueOptions(c3.elementZh || c3.element, ["火元素", "水元素", "风元素", "土元素", "四元素"]), answer: c3.elementZh || c3.element });
-  q.push({ question: `${c4.zhName} 属于哪个花色 / 系统？`, options: uniqueOptions(c4.suitZh || "大阿尔卡那", ["权杖", "圣杯", "宝剑", "星币", "大阿尔卡那"]), answer: c4.suitZh || "大阿尔卡那" });
-  q.push({ question: `关键词“${(c5.keywordsZh || c5.keywords)[0]}”可能对应哪张牌？`, options: uniqueOptions(c5.zhName, tarotCards.map((card) => card.zhName)), answer: c5.zhName });
+  q.push({ question: "以下哪个关键词组合更像一张牌的核心主题？", options: uniqueOptions(getCardKeywordOption(c1), cards.map(getCardKeywordOption)), answer: getCardKeywordOption(c1) });
+  q.push({ question: "当一张牌正位出现时，哪种解释更适合作为牌义判断？", options: uniqueOptions(getCardUprightMeaning(c2), cards.map(getCardUprightMeaning)), answer: getCardUprightMeaning(c2) });
+  q.push({ question: "逆位更适合被理解为哪一类提醒？", options: uniqueOptions(getCardReversedMeaning(c3), cards.map(getCardReversedMeaning)), answer: getCardReversedMeaning(c3) });
+  q.push({ question: "如果问题是“我最近的状态如何？”，哪个解读更像情境应用？", options: uniqueOptions(cardSituationOption(c4), cards.map(cardSituationOption)), answer: cardSituationOption(c4) });
+  q.push({ question: "学习一张牌时，哪个重点更适合作为复盘方向？", options: uniqueOptions(cardDistinctionOption(c5), cards.map(cardDistinctionOption)), answer: cardDistinctionOption(c5) });
   return q;
 }
