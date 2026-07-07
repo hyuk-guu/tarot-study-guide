@@ -75,6 +75,20 @@ function getCardDisplayName(card) {
   return `${getSafeText(card?.zhName, "未知牌", 24)} / ${getSafeText(card?.nameEn || card?.name, "Unknown Card", 32)}`;
 }
 
+// 牌名识别题保留给未来随机识牌训练，不用于单张牌小测。
+function generateNameQuestion(card, otherCards = tarotCards.filter((item) => item.id !== card.id)) {
+  const answer = getCardDisplayName(card);
+  return {
+    id: `${card.id}-name`,
+    type: "name",
+    label: "牌名识别",
+    prompt: "这张牌是？",
+    options: buildQuizOptions(answer, [otherCards.map(getCardDisplayName)], [], { allowCardNames: true }),
+    correctAnswer: answer,
+    allowCardNames: true
+  };
+}
+
 const genericQuizDistractors = [
   "强调先观察当下状态，再做出清醒选择。",
   "提醒你调整节奏，避免只凭惯性行动。",
@@ -118,6 +132,7 @@ function cleanQuizFragment(text) {
     .replace(/^不只是“?变坏”?，?/g, "")
     .replace(/^不是单纯的?[^，,。；;]*[，,]/g, "")
     .replace(/^更像是/g, "")
+    .replace(/^更适合/g, "适合")
     .replace(/^通常/g, "")
     .replace(/^\s*[：:，,、。；;]\s*/, "")
     .replace(/\s+/g, " ")
@@ -182,7 +197,7 @@ function normalizeQuizOptionText(text, options = {}) {
     compact = `可能提醒${compact}`;
   }
   if (mode === "scenario" && !/^你/.test(compact)) {
-    compact = `你需要${compact}`;
+    compact = /^(适合|正在|可能)/.test(compact) ? `你${compact}` : `你需要${compact}`;
   }
   compact = compact
     .replace(/\s+/g, " ")

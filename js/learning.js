@@ -184,10 +184,11 @@ function getDueReviewCards() {
 
 const questionTypeLabels = {
   name: "牌名识别",
-  keyword: "关键词匹配",
+  keyword: "关键词理解",
   upright: "正位含义",
-  reversed: "逆位含义",
-  scenario: "情境理解",
+  reversed: "逆位提醒",
+  scenario: "情境应用",
+  distinction: "学习重点",
   visual: "图像象征",
   system: "元素/牌组理解",
   contrast: "易混淆辨析"
@@ -328,6 +329,34 @@ function cardSituationOption(card) {
   });
 }
 
+function cardDistinctionOption(card) {
+  const source = card.studyTip || card.coreThemeZh || card.imageReading?.[0] || getCardKeywords(card);
+  return sanitizeQuizOptionText(source, card, {
+    mode: "meaning",
+    fallback: "抓住核心主题，避免只背单一关键词"
+  });
+}
+
+function createCardQuizQuestion(card, config) {
+  const answer = sanitizeQuizOptionText(config.answer, card, {
+    mode: config.mode,
+    fallback: config.fallback
+  });
+  return {
+    id: `${card.id}-${config.type}`,
+    type: config.type,
+    label: config.label,
+    prompt: config.prompt,
+    options: buildQuizOptions(config.answer, config.pools, config.fallbackPool || [], {
+      card,
+      mode: config.mode,
+      fallback: config.fallback
+    }),
+    correctAnswer: answer,
+    allowCardNames: false
+  };
+}
+
 function tomorrowIsoString() {
   const date = new Date();
   date.setDate(date.getDate() + 1);
@@ -338,68 +367,52 @@ function generateCardQuiz(card) {
   const otherCards = tarotCards.filter((item) => item.id !== card.id);
   const keyword = getCardKeywordOption(card);
   const otherKeywordOptions = otherCards.map(getCardKeywordOption);
-  const nameAnswer = getCardDisplayName(card);
   return [
-    {
-      type: "name",
-      label: questionTypeLabels.name,
-      question: "这张牌是？",
-      answer: nameAnswer,
-      options: buildQuizOptions(nameAnswer, [otherCards.map(getCardDisplayName)], [], { allowCardNames: true })
-    },
-    {
+    createCardQuizQuestion(card, {
       type: "keyword",
-      label: questionTypeLabels.keyword,
-      question: "以下哪个关键词最符合这张牌？",
+      label: "关键词理解",
+      prompt: "这张牌最核心的关键词组合是？",
       answer: keyword,
-      options: buildQuizOptions(keyword, [otherKeywordOptions], [], {
-        card,
-        mode: "keyword",
-        fallback: "核心主题、能量变化、学习重点"
-      })
-    },
-    {
+      pools: [otherKeywordOptions],
+      mode: "keyword",
+      fallback: "核心主题、能量变化、学习重点"
+    }),
+    createCardQuizQuestion(card, {
       type: "upright",
       label: questionTypeLabels.upright,
-      question: "当这张牌正位出现时，它通常更强调什么？",
-      answer: sanitizeQuizOptionText(getCardUprightMeaning(card), card, {
-        mode: "upright",
-        fallback: "保持开放，理解当前主题并采取行动"
-      }),
-      options: buildQuizOptions(getCardUprightMeaning(card), [otherCards.map(getCardUprightMeaning)], [], {
-        card,
-        mode: "upright",
-        fallback: "保持开放，理解当前主题并采取行动"
-      })
-    },
-    {
+      prompt: "这张牌正位时，更强调哪种状态？",
+      answer: getCardUprightMeaning(card),
+      pools: [otherCards.map(getCardUprightMeaning)],
+      mode: "upright",
+      fallback: "保持开放，理解当前主题并采取行动"
+    }),
+    createCardQuizQuestion(card, {
       type: "reversed",
       label: questionTypeLabels.reversed,
-      question: "当这张牌逆位出现时，它更可能提醒什么？",
-      answer: sanitizeQuizOptionText(getCardReversedMeaning(card), card, {
-        mode: "reversed",
-        fallback: "可能提醒能量受阻、内化或失衡"
-      }),
-      options: buildQuizOptions(getCardReversedMeaning(card), [otherCards.map(getCardReversedMeaning)], [], {
-        card,
-        mode: "reversed",
-        fallback: "可能提醒能量受阻、内化或失衡"
-      })
-    },
-    {
+      prompt: "这张牌逆位时，更可能提醒什么？",
+      answer: getCardReversedMeaning(card),
+      pools: [otherCards.map(getCardReversedMeaning)],
+      mode: "reversed",
+      fallback: "可能提醒能量受阻、内化或失衡"
+    }),
+    createCardQuizQuestion(card, {
       type: "scenario",
-      label: questionTypeLabels.scenario,
-      question: "如果问题是“我最近的状态如何？”，这张牌更可能提示什么？",
-      answer: sanitizeQuizOptionText(cardSituationOption(card), card, {
-        mode: "scenario",
-        fallback: "你需要观察当前状态，再做出清醒选择"
-      }),
-      options: buildQuizOptions(cardSituationOption(card), [otherCards.map(cardSituationOption)], [], {
-        card,
-        mode: "scenario",
-        fallback: "你需要观察当前状态，再做出清醒选择"
-      })
-    }
+      label: "情境应用",
+      prompt: "如果这张牌出现在近期状态中，更适合如何理解？",
+      answer: cardSituationOption(card),
+      pools: [otherCards.map(cardSituationOption)],
+      mode: "scenario",
+      fallback: "你需要观察当前状态，再做出清醒选择"
+    }),
+    createCardQuizQuestion(card, {
+      type: "distinction",
+      label: "学习重点",
+      prompt: "理解这张牌时，最应该抓住哪一个重点？",
+      answer: cardDistinctionOption(card),
+      pools: [otherCards.map(cardDistinctionOption)],
+      mode: "meaning",
+      fallback: "抓住核心主题，避免只背单一关键词"
+    })
   ];
 }
 
@@ -409,8 +422,8 @@ function renderCardQuiz(card) {
     <h3>基础小测</h3>
     <p class="learning-status-note">共 5 题。完成后会更新这张牌的学习状态。</p>
     ${questions.map((item, index) => `
-      <fieldset class="card-quiz-question" data-question-index="${index}" data-question-type="${escapeHtml(item.type)}" data-question-label="${escapeHtml(item.label)}" data-question-text="${escapeHtml(item.question)}" data-answer="${escapeHtml(item.answer)}">
-        <legend>${index + 1}. ${escapeHtml(item.question)}</legend>
+      <fieldset class="card-quiz-question" data-question-index="${index}" data-question-type="${escapeHtml(item.type)}" data-question-label="${escapeHtml(item.label)}" data-question-text="${escapeHtml(item.prompt)}" data-answer="${escapeHtml(item.correctAnswer)}">
+        <legend>${index + 1}. ${escapeHtml(item.prompt)}</legend>
         <div class="quiz-options">
           ${item.options.map((option) => `<button class="quiz-option" type="button" data-card-quiz-option="${escapeHtml(option)}">${escapeHtml(option)}</button>`).join("")}
         </div>
@@ -423,21 +436,21 @@ function renderCardQuiz(card) {
 
 function generateReviewQuiz(card) {
   const initial = generateCardQuiz(card);
-  return [initial[1], {
-    type: "reversed",
-    label: "正逆位理解",
-    question: "这张牌的正逆位理解，哪一项更合理？",
-    answer: sanitizeQuizOptionText(getCardReversedMeaning(card), card, {
+  const otherCards = tarotCards.filter((item) => item.id !== card.id);
+  return [
+    initial[0],
+    createCardQuizQuestion(card, {
+      type: "reversed",
+      label: "正逆位理解",
+      prompt: "这张牌的正逆位理解，哪一项更合理？",
+      answer: getCardReversedMeaning(card),
+      pools: [otherCards.map(getCardReversedMeaning)],
+      fallbackPool: tarotCards.map(getCardUprightMeaning),
       mode: "reversed",
       fallback: "可能提醒能量受阻、内化或失衡"
     }),
-    options: buildQuizOptions(
-      getCardReversedMeaning(card),
-      [tarotCards.filter((item) => item.id !== card.id).map(getCardReversedMeaning)],
-      tarotCards.map(getCardUprightMeaning),
-      { card, mode: "reversed", fallback: "可能提醒能量受阻、内化或失衡" }
-    )
-  }, initial[4]];
+    initial[3]
+  ];
 }
 
 function renderReviewQuiz(card) {
@@ -446,8 +459,8 @@ function renderReviewQuiz(card) {
     <h3>今日复习小测</h3>
     <p class="learning-status-note">共 3 题。通过后会更新掌握等级和下次复习日期。</p>
     ${questions.map((item, index) => `
-      <fieldset class="card-quiz-question" data-question-index="${index}" data-question-type="${escapeHtml(item.type)}" data-question-label="${escapeHtml(item.label)}" data-question-text="${escapeHtml(item.question)}" data-answer="${escapeHtml(item.answer)}">
-        <legend>${index + 1}. ${escapeHtml(item.question)}</legend>
+      <fieldset class="card-quiz-question" data-question-index="${index}" data-question-type="${escapeHtml(item.type)}" data-question-label="${escapeHtml(item.label)}" data-question-text="${escapeHtml(item.prompt)}" data-answer="${escapeHtml(item.correctAnswer)}">
+        <legend>${index + 1}. ${escapeHtml(item.prompt)}</legend>
         <div class="quiz-options">
           ${item.options.map((option) => `<button class="quiz-option" type="button" data-card-quiz-option="${escapeHtml(option)}">${escapeHtml(option)}</button>`).join("")}
         </div>
