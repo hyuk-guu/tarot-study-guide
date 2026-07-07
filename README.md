@@ -32,7 +32,7 @@
 
 - index.html
 - style.css
-- script.js
+- js/
 - assets/
 
 ## 数据存储
