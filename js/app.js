@@ -43,6 +43,14 @@ function init() {
   byId("random-fill-btn").addEventListener("click", randomFillSpread);
   byId("restart-quiz-btn").addEventListener("click", restartQuiz);
   byId("journal-form").addEventListener("submit", addJournalEntry);
+  byId("export-learning-data").addEventListener("click", exportLearningData);
+  byId("import-learning-data").addEventListener("click", () => {
+    byId("learning-data-file").click();
+  });
+  byId("learning-data-file").addEventListener("change", (event) => {
+    importLearningData(event.target.files?.[0]);
+    event.target.value = "";
+  });
   byId("card-modal").addEventListener("click", (event) => {
     const startLearningButton = event.target.closest("[data-start-learning]");
     const startQuizButton = event.target.closest("[data-start-card-quiz]");

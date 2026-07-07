@@ -87,6 +87,17 @@
           </div>
         </div>
         <p id="progress-summary">每次认识一张牌，慢慢建立属于自己的符号语言。</p>
+        <div class="learning-data-panel" aria-label="学习记录备份">
+          <div>
+            <strong>学习记录备份</strong>
+            <p>导出或导入本地学习进度、复习计划与错题记录。</p>
+          </div>
+          <div class="learning-data-actions">
+            <button id="export-learning-data" class="secondary-btn" type="button">导出学习记录</button>
+            <button id="import-learning-data" class="primary-btn" type="button">导入学习记录</button>
+            <input id="learning-data-file" type="file" accept="application/json,.json" hidden>
+          </div>
+        </div>
         <div id="daily-review-panel" class="daily-review-panel" aria-live="polite"></div>
         <div id="weakness-panel" class="weakness-panel" aria-live="polite"></div>
       </article>

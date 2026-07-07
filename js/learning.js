@@ -98,15 +98,22 @@ function saveLearningState(state) {
   }
 }
 
-function getCardLearningState(cardId) {
-  const existing = getLearningState()[cardId] || {};
-  const merged = { ...getDefaultCardLearningState(cardId), ...existing, cardId };
+function normalizeCardLearningState(cardId, value = {}) {
+  const merged = { ...getDefaultCardLearningState(cardId), ...(value || {}), cardId };
   merged.masteryLevel = Math.min(5, Math.max(0, Number(merged.masteryLevel || 0)));
   merged.testHistory = Array.isArray(merged.testHistory) ? merged.testHistory : [];
   merged.correctStreak = Number(merged.correctStreak || 0);
   merged.wrongCount = Number(merged.wrongCount || 0);
   merged.reviewCount = Number(merged.reviewCount || 0);
+  if (!["new", "learning", "reviewing", "mastered", "weak"].includes(merged.status)) {
+    merged.status = "new";
+  }
   return merged;
+}
+
+function getCardLearningState(cardId) {
+  const existing = getLearningState()[cardId] || {};
+  return normalizeCardLearningState(cardId, existing);
 }
 
 function updateCardLearningState(cardId, patch = {}) {
@@ -130,6 +137,95 @@ function updateCardLearningState(cardId, patch = {}) {
 function resetLearningState() {
   localStorage.removeItem("tarotLearningState");
   renderStudyProgress();
+}
+
+function getLearningBackupFileName() {
+  const date = new Date().toISOString().slice(0, 10);
+  return `tarot-learning-backup-${date}.json`;
+}
+
+function buildLearningBackupPayload() {
+  return {
+    metadata: {
+      app: "tarot-study",
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      totalCards: tarotCards.length
+    },
+    learningState: getLearningState()
+  };
+}
+
+function exportLearningData() {
+  const payload = buildLearningBackupPayload();
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = getLearningBackupFileName();
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 0);
+  showToast("学习记录已导出。");
+}
+
+function normalizeImportedLearningState(learningState) {
+  if (!learningState || typeof learningState !== "object" || Array.isArray(learningState)) {
+    throw new Error("导入文件缺少 learningState。");
+  }
+
+  const validCardIds = new Set(tarotCards.map((card) => card.id));
+  const nextState = {};
+  Object.entries(learningState).forEach(([key, value]) => {
+    const cardId = String(value?.cardId || key || "").trim();
+    if (!validCardIds.has(cardId)) return;
+    nextState[cardId] = normalizeCardLearningState(cardId, value);
+  });
+  return nextState;
+}
+
+function applyLearningDataImport(payload) {
+  if (!payload || typeof payload !== "object") throw new Error("导入文件格式不正确。");
+  if (payload.metadata?.app !== "tarot-study") throw new Error("这不是 tarot-study 的学习记录备份。");
+  const nextState = normalizeImportedLearningState(payload.learningState);
+  saveLearningState(nextState);
+  refreshLearningDataViews();
+  return nextState;
+}
+
+function refreshLearningDataViews() {
+  renderStudyProgress();
+  renderCards();
+  const modal = byId("card-modal");
+  if (modal?.classList.contains("open")) {
+    const zhName = modal.querySelector("#modal-title .card-name-zh")?.textContent?.trim();
+    const enName = modal.querySelector("#modal-title .card-name-en")?.textContent?.trim();
+    const card = getCardByName(enName || zhName);
+    if (card) refreshCardLearningStatus(card);
+  }
+}
+
+function importLearningData(file) {
+  if (!file) return;
+  const confirmed = window.confirm("导入会覆盖当前浏览器中的学习记录，建议先导出备份。确定继续吗？");
+  if (!confirmed) return;
+
+  const reader = new FileReader();
+  reader.addEventListener("load", () => {
+    try {
+      const payload = JSON.parse(String(reader.result || ""));
+      applyLearningDataImport(payload);
+      showToast("学习记录导入成功。");
+    } catch (error) {
+      console.warn("Unable to import tarot learning data.", error);
+      showToast(error.message || "导入失败，请检查 JSON 文件。", "error");
+    }
+  });
+  reader.addEventListener("error", () => {
+    showToast("导入失败，无法读取这个文件。", "error");
+  });
+  reader.readAsText(file);
 }
 
 function getLearningStatusLabel(status) {
@@ -581,6 +677,8 @@ Object.assign(window, {
   getCardLearningState,
   updateCardLearningState,
   resetLearningState,
+  exportLearningData,
+  importLearningDataFromFile: importLearningData,
   getReviewIntervalDays,
   calculateNextReviewDate,
   getDueReviewCards,

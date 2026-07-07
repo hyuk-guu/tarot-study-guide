@@ -30,6 +30,25 @@ function displayOrientation(value) {
   return value === "reversed" ? "逆位" : "正位";
 }
 
+function showToast(message, type = "success") {
+  let toast = byId("app-toast");
+  if (!toast) {
+    toast = document.createElement("div");
+    toast.id = "app-toast";
+    toast.className = "app-toast";
+    toast.setAttribute("role", "status");
+    toast.setAttribute("aria-live", "polite");
+    document.body.appendChild(toast);
+  }
+  toast.textContent = message;
+  toast.dataset.type = type;
+  toast.classList.add("visible");
+  window.clearTimeout(showToast.timer);
+  showToast.timer = window.setTimeout(() => {
+    toast.classList.remove("visible");
+  }, 3200);
+}
+
 function renderCardImage(card, variant = "thumb") {
   const label = escapeHtml(card.imageAlt || `${card.name} 塔罗牌图`);
   const zh = escapeHtml(card.zhName || card.name || "牌图待补");

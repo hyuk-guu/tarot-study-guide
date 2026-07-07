@@ -487,6 +487,30 @@ button {
   justify-self: start;
 }
 
+.learning-data-panel {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgba(255, 252, 246, 0.38);
+}
+
+.learning-data-panel strong {
+  color: var(--gold);
+}
+
+.learning-data-panel p {
+  margin: 4px 0 0;
+}
+
+.learning-data-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 .weakness-panel {
   display: grid;
   gap: 12px;
@@ -1275,6 +1299,33 @@ textarea:focus {
   border-radius: 50%;
   border: 1px solid rgba(255, 255, 255, 0.38);
   box-shadow: 0 0 24px rgba(255, 255, 255, 0.11);
+}
+
+.app-toast {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 80;
+  max-width: min(360px, calc(100vw - 36px));
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgba(255, 252, 246, 0.96);
+  color: var(--cream);
+  box-shadow: var(--shadow);
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.app-toast.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.app-toast[data-type="error"] {
+  border-color: rgba(214, 117, 117, 0.8);
 }
 
 .quiz-panel {
