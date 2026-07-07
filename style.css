@@ -1938,3 +1938,769 @@ textarea:focus {
     grid-template-columns: 1fr;
   }
 }
+
+/* Figma-inspired parchment dashboard refresh */
+:root {
+  --bg: #f6ecd6;
+  --bg-soft: #efe0bf;
+  --paper: #efe2c3;
+  --panel: #eadbb8;
+  --panel-solid: #eadbb8;
+  --panel-strong: #e3d0a8;
+  --line: rgba(197, 160, 82, 0.38);
+  --line-bright: rgba(196, 157, 69, 0.74);
+  --gold: #b99337;
+  --gold-bright: #d0ac4b;
+  --cream: #2a130c;
+  --brown: #4f3322;
+  --muted: #80624a;
+  --wine: #8e4e42;
+  --plum: #8b6f8d;
+  --green: #77865c;
+  --danger: #9d4f46;
+  --sidebar: #1b0702;
+  --sidebar-soft: #341709;
+  --shadow: 0 18px 38px rgba(80, 45, 18, 0.08);
+  --glow: 0 0 0 1px rgba(201, 161, 77, 0.14), 0 16px 38px rgba(95, 61, 24, 0.08);
+  --radius: 20px;
+}
+
+body {
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.18) 0 1px, transparent 1px),
+    linear-gradient(#f9efd9, #f3e6ca 58%, #f6edd8);
+  background-size: 100% 100%, 100% 100%;
+  color: var(--cream);
+  font-family: Georgia, "Times New Roman", "Noto Serif SC", "Songti SC", serif;
+  letter-spacing: 0.01em;
+}
+
+body::before {
+  background-image:
+    radial-gradient(rgba(136, 94, 43, 0.065) 0.6px, transparent 0.6px),
+    linear-gradient(rgba(136, 94, 43, 0.035) 1px, transparent 1px);
+  background-size: 18px 18px, 88px 88px;
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.22), transparent 80%);
+}
+
+.page-aura {
+  background:
+    radial-gradient(circle at 70% 0, rgba(205, 172, 83, 0.15), transparent 28rem),
+    radial-gradient(circle at 62% 52%, rgba(255, 255, 255, 0.18), transparent 44rem);
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: Georgia, "Times New Roman", "Noto Serif SC", "Songti SC", serif;
+}
+
+.site-header {
+  background: var(--sidebar);
+  border: 0;
+  box-shadow: inset -1px 0 rgba(203, 165, 74, 0.18);
+  backdrop-filter: none;
+}
+
+.brand {
+  align-items: flex-start;
+  color: var(--gold-bright);
+  font-weight: 500;
+  gap: 16px;
+  letter-spacing: 0.3em;
+}
+
+.brand-mark {
+  width: auto;
+  height: auto;
+  border: 0;
+  box-shadow: none;
+  color: var(--gold-bright);
+  font-size: 1.6rem;
+}
+
+.brand strong,
+.brand small {
+  display: block;
+}
+
+.brand strong {
+  font-size: 1.35rem;
+  font-weight: 500;
+}
+
+.brand small {
+  margin-top: 10px;
+  color: rgba(208, 172, 75, 0.48);
+  font-size: 0.76rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+}
+
+.nav-links a,
+.ghost-btn,
+.filter-btn,
+.secondary-btn,
+.primary-btn,
+.chip-btn,
+.lens-spread-option,
+.edit-card-btn,
+.number-btn,
+input,
+select,
+textarea {
+  border-radius: 14px;
+}
+
+.nav-links a {
+  position: relative;
+  color: rgba(208, 172, 75, 0.48);
+  font-size: 0.98rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.nav-links a::before {
+  content: "✦";
+  display: inline-block;
+  width: 28px;
+  color: rgba(208, 172, 75, 0.45);
+}
+
+.nav-links a:nth-child(1)::before { content: "☽"; }
+.nav-links a:nth-child(2)::before { content: "✦"; }
+.nav-links a:nth-child(3)::before { content: "◇"; }
+.nav-links a:nth-child(4)::before { content: "△"; }
+.nav-links a:nth-child(5)::before { content: "◆"; }
+.nav-links a:nth-child(6)::before { content: "◎"; }
+.nav-links a:nth-child(7)::before { content: "✧"; }
+.nav-links a:nth-child(8)::before { content: "✶"; }
+.nav-links a:nth-child(9)::before { content: "◉"; }
+
+.nav-links a:hover,
+.nav-links a:focus-visible {
+  color: var(--gold-bright);
+  border-color: rgba(208, 172, 75, 0.38);
+  background: rgba(92, 45, 14, 0.68);
+  box-shadow: inset 4px 0 var(--gold);
+}
+
+.section {
+  width: min(1400px, calc(100% - 72px));
+  padding: 58px 0;
+}
+
+.eyebrow,
+.panel-label {
+  color: var(--gold);
+  font-size: 0.83rem;
+  letter-spacing: 0.28em;
+  font-weight: 600;
+}
+
+.section-heading h2,
+.progress-card h2,
+.hero-content h1 {
+  color: var(--cream);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.section-heading p:not(.eyebrow),
+.progress-card p,
+.map-card p,
+.detail-panel,
+.spread-card p,
+.quiz-panel,
+.journal-entry p,
+.hero-copy {
+  color: var(--muted);
+}
+
+.hero {
+  min-height: auto;
+  grid-template-columns: 1fr;
+  align-items: stretch;
+  gap: 32px;
+  padding-top: 66px;
+}
+
+.hero-content {
+  position: relative;
+  padding-right: 260px;
+}
+
+.hero-content::after {
+  content: "☽  新月";
+  position: absolute;
+  right: 0;
+  top: 8px;
+  min-width: 178px;
+  padding: 16px 24px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  color: var(--gold);
+  background: rgba(239, 226, 194, 0.72);
+  text-align: center;
+  letter-spacing: 0.18em;
+}
+
+.hero-content h1 {
+  max-width: none;
+  font-size: clamp(2.6rem, 4.5vw, 4.6rem);
+  line-height: 1.08;
+  text-shadow: none;
+}
+
+.hero-title-lock {
+  white-space: normal;
+}
+
+.hero-actions {
+  margin-top: 24px;
+}
+
+.daily-panel {
+  min-height: 560px;
+  display: block;
+}
+
+.moon-orbit {
+  display: none;
+}
+
+.daily-card {
+  width: 100%;
+  min-height: 560px;
+  padding: 76px 70px 64px clamp(360px, 34vw, 470px);
+  justify-content: center;
+  border-radius: 22px;
+  background: linear-gradient(90deg, rgba(220, 207, 174, 0.88) 0 26%, rgba(235, 220, 184, 0.92) 26% 100%);
+  box-shadow: none;
+  overflow: hidden;
+}
+
+.daily-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 26%;
+  width: 1px;
+  border: 0;
+  background: rgba(177, 139, 65, 0.24);
+  border-radius: 0;
+}
+
+.daily-card::after {
+  content: "XVII\A ✦\A THE STAR";
+  white-space: pre;
+  position: absolute;
+  left: clamp(70px, 8vw, 120px);
+  top: 50%;
+  width: 166px;
+  height: 270px;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  padding: 28px 18px;
+  border: 8px solid #092039;
+  border-radius: 12px;
+  background:
+    radial-gradient(circle at 50% 46%, #e5c454 0 9%, transparent 10%),
+    radial-gradient(circle at 22% 55%, #bf9b46 0 2px, transparent 3px),
+    radial-gradient(circle at 72% 35%, #bf9b46 0 2px, transparent 3px),
+    linear-gradient(#0b2c4b, #08213a);
+  color: var(--gold-bright);
+  font-size: 0.9rem;
+  line-height: 5.4;
+  letter-spacing: 0.35em;
+  text-align: center;
+  box-shadow: 0 16px 34px rgba(20, 10, 4, 0.18);
+}
+
+.daily-card h2 {
+  font-size: clamp(3.1rem, 5.4vw, 5.2rem);
+  line-height: 1;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.daily-card .card-name-en,
+.daily-card .card-name-zh {
+  color: var(--cream);
+  font-size: inherit;
+  font-weight: 500;
+}
+
+.daily-card .card-name-zh {
+  font-size: clamp(2.1rem, 4.8vw, 4.2rem);
+}
+
+.daily-card .card-name-en {
+  margin-top: 10px;
+  color: var(--gold);
+  font-size: clamp(1rem, 1.6vw, 1.4rem);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+.keyword-line {
+  color: var(--gold);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.primary-btn,
+.secondary-btn,
+.ghost-btn,
+.filter-btn {
+  min-height: 44px;
+  padding: 12px 18px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.primary-btn {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: var(--cream);
+  box-shadow: none;
+}
+
+.secondary-btn,
+.ghost-btn,
+.filter-btn {
+  background: rgba(246, 236, 214, 0.42);
+  color: var(--gold);
+}
+
+.dashboard-grid {
+  grid-template-columns: 1fr;
+  gap: 34px;
+  padding-top: 0;
+}
+
+.progress-card,
+.quick-card,
+.map-card,
+.tarot-card,
+.element-card,
+.spread-card,
+.detail-panel,
+.spread-playground,
+.quiz-panel,
+.journal-form,
+.journal-entry,
+.upload-card,
+.mini-detail,
+.detected-panel,
+.interpretation-panel,
+.lens-loading,
+.detected-card,
+.reading-block,
+.modal-card {
+  border-radius: var(--radius);
+  border-color: var(--line);
+  background: var(--panel);
+  box-shadow: none;
+}
+
+.progress-card {
+  padding: 42px;
+}
+
+.progress-list {
+  gap: 22px;
+}
+
+.progress-row {
+  grid-template-columns: minmax(150px, 220px) minmax(160px, 1fr) 80px;
+  gap: 22px;
+}
+
+.progress-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.progress-track {
+  height: 6px;
+  border: 0;
+  background: rgba(186, 150, 63, 0.16);
+}
+
+.progress-track span {
+  background: var(--gold);
+  box-shadow: none;
+}
+
+.daily-review-panel,
+.learning-data-panel,
+.weakness-panel {
+  border-radius: 16px;
+  background: rgba(246, 236, 214, 0.42);
+}
+
+.quick-links {
+  position: relative;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+  padding-top: 72px;
+}
+
+.quick-links::before {
+  content: "EXPLORE THE ARCANA";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  color: var(--cream);
+  font-size: 0.92rem;
+  letter-spacing: 0.32em;
+}
+
+.quick-links::before {
+  border-top: 1px solid rgba(196, 157, 69, 0.28);
+  padding-top: 18px;
+}
+
+.quick-card {
+  min-height: 240px;
+  padding: 34px;
+  justify-content: start;
+  gap: 24px;
+}
+
+.quick-card strong,
+.map-card h3,
+.tarot-card h3,
+.element-card h3,
+.spread-card h3,
+.journal-head h3 {
+  color: var(--cream);
+  font-size: 1.35rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.quick-card small {
+  color: var(--muted);
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.quick-card span,
+.element-symbol {
+  color: var(--gold);
+}
+
+.library-controls {
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+}
+
+input,
+select,
+textarea {
+  background: rgba(246, 236, 214, 0.72);
+  border-color: var(--line);
+  color: var(--cream);
+}
+
+.tarot-grid {
+  grid-template-columns: repeat(auto-fit, minmax(245px, 1fr));
+  gap: 22px;
+}
+
+.tarot-card {
+  padding: 18px;
+  grid-template-rows: auto auto auto auto 1fr auto;
+  gap: 13px;
+}
+
+.tarot-image-frame {
+  border-radius: 16px;
+  background:
+    linear-gradient(145deg, rgba(246, 236, 214, 0.86), rgba(226, 208, 166, 0.84)),
+    repeating-linear-gradient(45deg, rgba(176, 137, 55, 0.08) 0 5px, transparent 5px 12px);
+  box-shadow: inset 0 0 0 1px rgba(255, 250, 236, 0.32);
+}
+
+.tarot-image-frame.thumb {
+  max-height: 310px;
+}
+
+.card-name-zh {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.card-name-en {
+  color: var(--gold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.plain-tag,
+.system-tag,
+.system-item-button,
+.related-card-button,
+.journal-card-list span,
+.journal-card-list button,
+.journal-card-link {
+  background: rgba(246, 236, 214, 0.52);
+  border-color: var(--line);
+  color: var(--muted);
+}
+
+.modal-backdrop {
+  background: rgba(27, 7, 2, 0.56);
+}
+
+.modal-card {
+  width: min(980px, 100%);
+  max-height: min(860px, 92vh);
+  background: #f0e1bf;
+}
+
+.visual-reading-block,
+.learning-section-item,
+.system-path-card,
+.card-learning-status,
+.card-quiz-question {
+  border-radius: 16px;
+  background: rgba(246, 236, 214, 0.5);
+}
+
+.quiz-option {
+  border-radius: 16px;
+  background: rgba(246, 236, 214, 0.58);
+}
+
+.site-footer {
+  border-color: var(--line);
+}
+
+@media (min-width: 1080px) {
+  body {
+    padding-left: 280px;
+  }
+
+  .site-header {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 40;
+    width: 280px;
+    min-height: 100vh;
+  }
+
+  .navbar {
+    width: 100%;
+    min-height: 100vh;
+    margin: 0;
+    padding: 58px 24px 34px;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 46px;
+  }
+
+  .navbar::before {
+    content: "";
+    height: 1px;
+    background: rgba(208, 172, 75, 0.12);
+    order: 1;
+  }
+
+  .navbar::after {
+    content: "◎  个人学习空间\A 7-day streak ✦";
+    white-space: pre;
+    margin-top: auto;
+    padding: 26px 10px 0;
+    border-top: 1px solid rgba(208, 172, 75, 0.18);
+    color: var(--gold);
+    line-height: 1.8;
+  }
+
+  .brand {
+    order: 0;
+  }
+
+  .nav-links {
+    order: 2;
+    display: grid;
+    gap: 14px;
+  }
+
+  .nav-links a {
+    padding: 14px 18px;
+    border-color: transparent;
+    border-radius: 8px;
+  }
+
+  .nav-links a:first-child {
+    color: var(--gold-bright);
+    background: var(--sidebar-soft);
+    box-shadow: inset 4px 0 var(--gold);
+  }
+
+  main,
+  .site-footer {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 1079px) {
+  .site-header {
+    position: sticky;
+    top: 0;
+    background: rgba(27, 7, 2, 0.94);
+  }
+
+  .navbar {
+    width: min(100% - 24px, 1180px);
+    min-height: 76px;
+  }
+
+  .nav-links {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    padding-bottom: 4px;
+  }
+
+  .nav-links a {
+    flex: 0 0 auto;
+  }
+}
+
+@media (max-width: 920px) {
+  .hero-content {
+    padding-right: 0;
+  }
+
+  .hero-content::after {
+    position: static;
+    display: inline-block;
+    margin-top: 18px;
+  }
+
+  .daily-card {
+    min-height: 500px;
+    padding: 300px 28px 38px;
+    background: linear-gradient(180deg, rgba(220, 207, 174, 0.88) 0 48%, rgba(235, 220, 184, 0.92) 48% 100%);
+  }
+
+  .daily-card::before {
+    inset: 48% 0 auto 0;
+    width: auto;
+    height: 1px;
+  }
+
+  .daily-card::after {
+    top: 42px;
+    left: 50%;
+    width: 148px;
+    height: 230px;
+    transform: translateX(-50%);
+  }
+
+  .quick-links {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .progress-row {
+    grid-template-columns: minmax(120px, 170px) minmax(120px, 1fr) 72px;
+  }
+}
+
+@media (max-width: 720px) {
+  .section {
+    width: min(100% - 24px, 1180px);
+  }
+
+  .navbar {
+    gap: 14px;
+  }
+
+  .brand strong {
+    font-size: 1.05rem;
+  }
+
+  .hero-content h1 {
+    font-size: clamp(2rem, 10vw, 3.1rem);
+  }
+
+  .daily-panel {
+    min-height: auto;
+  }
+
+  .daily-card {
+    min-height: 470px;
+  }
+
+  .progress-card {
+    padding: 24px;
+  }
+
+  .progress-row {
+    grid-template-columns: 1fr 70px;
+    gap: 8px 12px;
+  }
+
+  .progress-row .progress-track {
+    grid-column: 1 / -1;
+  }
+
+  .quick-links {
+    grid-template-columns: 1fr;
+  }
+
+  .quick-card {
+    min-height: 180px;
+  }
+
+  .tarot-grid {
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  }
+}
+
+@media (max-width: 430px) {
+  .section {
+    width: min(100% - 18px, 1180px);
+    padding: 42px 0;
+  }
+
+  .hero {
+    padding-top: 34px;
+  }
+
+  .hero-actions {
+    display: grid;
+  }
+
+  .daily-card {
+    padding-inline: 20px;
+  }
+
+  .daily-card h2 {
+    font-size: 2.4rem;
+  }
+
+  .library-controls {
+    padding: 16px;
+  }
+
+  .tarot-grid {
+    grid-template-columns: 1fr;
+  }
+}
