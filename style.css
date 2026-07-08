@@ -2775,3 +2775,383 @@ textarea {
     grid-template-columns: 1fr;
   }
 }
+
+/* Figma dashboard alignment pass */
+@media (min-width: 1080px) {
+  body {
+    padding-left: 252px;
+  }
+
+  .site-header {
+    width: 252px;
+  }
+
+  .navbar {
+    padding: 34px 20px;
+    gap: 34px;
+  }
+
+  .brand {
+    gap: 12px;
+  }
+
+  .brand strong {
+    font-size: 1.24rem;
+    letter-spacing: 0.26em;
+  }
+
+  .brand small {
+    margin-top: 8px;
+    font-size: 0.72rem;
+  }
+
+  .nav-links {
+    gap: 10px;
+  }
+
+  .nav-links a {
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    padding: 11px 14px;
+    color: rgba(208, 172, 75, 0.58);
+  }
+
+  .nav-links a:first-child,
+  .nav-links a:hover,
+  .nav-links a:focus-visible {
+    width: 100%;
+    color: var(--gold-bright);
+    background: rgba(67, 30, 10, 0.92);
+    border-color: transparent;
+    box-shadow: inset 4px 0 var(--gold);
+  }
+
+  .section {
+    width: min(1280px, calc(100% - 96px));
+    margin-left: 48px;
+    margin-right: auto;
+    padding-block: 52px;
+  }
+}
+
+.hero {
+  display: block;
+  min-height: auto;
+  padding-top: 54px;
+}
+
+.hero-content {
+  position: relative;
+  max-width: none;
+  margin-bottom: 34px;
+  padding-right: 220px;
+}
+
+.hero-content h1 {
+  max-width: 980px;
+  font-size: clamp(3rem, 4.6vw, 5rem);
+  line-height: 1.05;
+  letter-spacing: 0.08em;
+}
+
+.hero-content::after {
+  right: 0;
+  top: 10px;
+  min-width: 160px;
+  padding: 14px 22px;
+}
+
+.hero-actions {
+  margin-top: 22px;
+}
+
+.daily-panel {
+  min-height: auto;
+  display: block;
+}
+
+.daily-card {
+  display: grid;
+  grid-template-columns: minmax(260px, 32%) minmax(0, 68%);
+  align-items: center;
+  min-height: 430px;
+  max-height: 480px;
+  width: 100%;
+  padding: 0;
+  border-radius: 22px;
+  background: linear-gradient(90deg, rgba(221, 207, 171, 0.9) 0 32%, rgba(235, 220, 184, 0.94) 32% 100%);
+}
+
+.daily-card::before {
+  inset: 0 auto 0 32%;
+  width: 1px;
+  height: auto;
+  border: 0;
+  border-radius: 0;
+  background: rgba(177, 139, 65, 0.24);
+}
+
+.daily-card-image {
+  position: static;
+  transform: none;
+  grid-column: 1;
+  grid-row: 1 / span 5;
+  justify-self: center;
+  align-self: center;
+  width: clamp(180px, 16vw, 220px);
+  z-index: 1;
+}
+
+.daily-card-image .tarot-image-frame.large {
+  width: 100%;
+  border: 5px solid rgba(37, 20, 12, 0.9);
+  border-radius: 14px;
+  box-shadow: 0 18px 36px rgba(48, 28, 10, 0.22);
+}
+
+.daily-card > .panel-label,
+.daily-card > h2,
+.daily-card > .keyword-line,
+.daily-card > #daily-card-meaning,
+.daily-card > .daily-actions {
+  grid-column: 2;
+  margin-left: 64px;
+  margin-right: 64px;
+}
+
+.daily-card > .panel-label {
+  align-self: end;
+  margin-bottom: 8px;
+}
+
+.daily-card h2 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  font-size: clamp(2.8rem, 4.2vw, 4.8rem);
+}
+
+.daily-card h2 .card-name-zh {
+  font-size: clamp(2.6rem, 4vw, 4.4rem);
+}
+
+.daily-card h2 .card-name-en {
+  margin-top: 10px;
+  font-size: clamp(1rem, 1.4vw, 1.35rem);
+}
+
+.daily-card .keyword-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  letter-spacing: 0.12em;
+}
+
+.daily-card .keyword-line::before {
+  content: "";
+}
+
+.daily-card #daily-card-meaning {
+  max-width: 760px;
+  font-size: 1.06rem;
+  line-height: 1.9;
+}
+
+.daily-actions {
+  display: flex;
+  gap: 14px;
+  align-self: start;
+  margin-top: 18px;
+}
+
+.daily-actions .secondary-btn {
+  width: auto;
+  min-width: 180px;
+}
+
+.dashboard-grid {
+  display: block;
+  padding-top: 0;
+}
+
+.study-cards {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(360px, 1fr);
+  gap: 28px;
+}
+
+.progress-card,
+.rhythm-card {
+  min-height: 430px;
+  padding: 42px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: var(--panel);
+  box-shadow: none;
+}
+
+.dashboard-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 34px;
+}
+
+.dashboard-card-head .eyebrow {
+  margin: 0;
+  color: var(--cream);
+  letter-spacing: 0.28em;
+}
+
+#progress-percent-pill {
+  color: var(--gold);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.progress-list {
+  gap: 25px;
+}
+
+.progress-row {
+  grid-template-columns: minmax(120px, 180px) minmax(180px, 1fr) 68px;
+  gap: 18px;
+}
+
+.progress-name {
+  color: var(--cream);
+  font-size: 1.18rem;
+  font-weight: 600;
+}
+
+.progress-track {
+  height: 5px;
+  background: rgba(186, 150, 63, 0.15);
+}
+
+.progress-track span {
+  background: linear-gradient(90deg, #8f6d18, var(--gold-bright));
+}
+
+.rhythm-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.rhythm-stat {
+  min-height: 150px;
+  padding: 24px;
+  border: 1px solid rgba(197, 160, 82, 0.3);
+  border-radius: 18px;
+  background: rgba(235, 220, 184, 0.42);
+}
+
+.rhythm-stat span {
+  display: block;
+  color: var(--gold-bright);
+  font-size: 1.25rem;
+  margin-bottom: 22px;
+}
+
+.rhythm-stat strong {
+  display: block;
+  color: var(--cream);
+  font-size: clamp(2rem, 3.6vw, 3.2rem);
+  font-weight: 500;
+  line-height: 1;
+}
+
+.rhythm-stat small {
+  display: block;
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.dashboard-support {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.9fr) minmax(260px, 0.8fr) minmax(320px, 1.2fr);
+  gap: 18px;
+  margin-top: 22px;
+}
+
+.dashboard-support > * {
+  min-width: 0;
+}
+
+.quick-links {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+  padding-top: 78px;
+  margin-top: 34px;
+}
+
+.quick-links::before {
+  content: "继续探索";
+  color: var(--cream);
+}
+
+.quick-card {
+  min-height: 190px;
+  padding: 30px;
+  gap: 18px;
+}
+
+.quick-card:hover {
+  border-color: var(--line-bright);
+  box-shadow: 0 16px 34px rgba(80, 45, 18, 0.1);
+}
+
+.quick-card strong {
+  text-transform: none;
+}
+
+.quick-card small {
+  font-size: 0.98rem;
+  line-height: 1.75;
+}
+
+@media (max-width: 1079px) {
+  .hero-content {
+    padding-right: 0;
+  }
+
+  .hero-content::after {
+    position: static;
+    display: inline-block;
+    margin-top: 18px;
+  }
+
+  .daily-card,
+  .study-cards,
+  .dashboard-support {
+    grid-template-columns: 1fr;
+  }
+
+  .daily-card {
+    max-height: none;
+    padding: 34px;
+  }
+
+  .daily-card::before {
+    display: none;
+  }
+
+  .daily-card > .panel-label,
+  .daily-card > h2,
+  .daily-card > .keyword-line,
+  .daily-card > #daily-card-meaning,
+  .daily-card > .daily-actions {
+    grid-column: auto;
+    margin-inline: 0;
+  }
+
+  .daily-card-image {
+    width: 180px;
+    margin: 0 auto 24px;
+  }
+}

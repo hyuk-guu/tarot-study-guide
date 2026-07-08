@@ -33,7 +33,7 @@
     <section id="dashboard" class="hero section">
       <div class="hero-content">
         <p class="eyebrow">✦ 今日学习桌</p>
-        <h1><span class="hero-title-lock">晚上好，塔罗学习者</span></h1>
+        <h1><span class="hero-title-lock">晚上好，开始今天的塔罗学习</span></h1>
         <p class="hero-copy">新月、牌面、符号与练习节奏，都在这里慢慢整理成你的个人学习手册。</p>
         <div class="hero-actions">
           <button class="primary-btn" id="draw-card-btn" type="button">抽取今日牌</button>
@@ -53,41 +53,45 @@
           <h2 id="daily-card-name">月亮 The Moon</h2>
           <p id="daily-card-keywords" class="keyword-line">直觉、梦境、阴影</p>
           <p id="daily-card-meaning">聆听表象之下更真实的声音。</p>
-          <button id="daily-card-detail" class="secondary-btn" type="button">查看详情</button>
+          <div class="daily-actions">
+            <button id="daily-card-detail" class="secondary-btn" type="button">学习这张牌</button>
+          </div>
         </article>
       </div>
     </section>
 
     <section class="section dashboard-grid" aria-label="学习首页">
-      <article class="progress-card">
-        <div class="section-heading compact">
-          <p class="eyebrow">当前学习进度</p>
-          <h2>18%</h2>
-        </div>
-        <div id="progress-list" class="progress-list" aria-label="分模块学习进度">
-          <div class="progress-row">
-            <span class="progress-name">大阿尔卡那</span>
-            <div class="progress-track" aria-label="大阿尔卡那学习进度：22%">
-              <span style="width: 22%"></span>
-            </div>
-            <strong>22%</strong>
+      <div class="study-cards">
+        <article class="progress-card">
+          <div class="dashboard-card-head">
+            <p class="eyebrow">✦ 学习进度</p>
+            <span id="progress-percent-pill">0%</span>
           </div>
-          <div class="progress-row">
-            <span class="progress-name">小牌数字</span>
-            <div class="progress-track" aria-label="小牌数字学习进度：18%">
-              <span style="width: 18%"></span>
+          <div id="progress-list" class="progress-list" aria-label="分牌组掌握度">
+            <div class="progress-row">
+              <span class="progress-name">大阿尔卡那</span>
+              <div class="progress-track" aria-label="大阿尔卡那：0/22">
+                <span style="width: 0%"></span>
+              </div>
+              <strong>0/22</strong>
             </div>
-            <strong>18%</strong>
           </div>
-          <div class="progress-row">
-            <span class="progress-name">牌阵练习</span>
-            <div class="progress-track" aria-label="牌阵练习学习进度：14%">
-              <span style="width: 14%"></span>
-            </div>
-            <strong>14%</strong>
+        </article>
+
+        <article class="rhythm-card">
+          <div class="dashboard-card-head">
+            <p class="eyebrow">◎ 学习节奏</p>
           </div>
-        </div>
-        <p id="progress-summary">每次认识一张牌，慢慢建立属于自己的符号语言。</p>
+          <div id="rhythm-list" class="rhythm-list" aria-label="学习节奏统计">
+            <div class="rhythm-stat"><span>✦</span><strong>0</strong><small>已学习</small></div>
+            <div class="rhythm-stat"><span>◇</span><strong>0</strong><small>已掌握</small></div>
+            <div class="rhythm-stat"><span>◎</span><strong>0</strong><small>今日应复习</small></div>
+            <div class="rhythm-stat"><span>✧</span><strong>0</strong><small>薄弱牌</small></div>
+          </div>
+        </article>
+      </div>
+
+      <div class="dashboard-support">
         <div class="learning-data-panel" aria-label="学习记录备份">
           <div>
             <strong>学习记录备份</strong>
@@ -101,28 +105,33 @@
         </div>
         <div id="daily-review-panel" class="daily-review-panel" aria-live="polite"></div>
         <div id="weakness-panel" class="weakness-panel" aria-live="polite"></div>
-      </article>
+      </div>
 
       <div class="quick-links" aria-label="快速入口">
         <a href="#cards" class="quick-card">
           <span>✦</span>
-          <strong>大阿尔卡那</strong>
-          <small>原型与人生转折</small>
-        </a>
-        <a href="#cards" class="quick-card">
-          <span>✧</span>
-          <strong>小阿尔卡那</strong>
-          <small>日常事件与现实变化</small>
+          <strong>浏览牌库</strong>
+          <small>查看 78 张牌的牌义、图像与练习入口</small>
         </a>
         <a href="#elements" class="quick-card">
-          <span>△</span>
-          <strong>四元素</strong>
-          <small>火、水、风、土</small>
+          <span>✧</span>
+          <strong>学习元素</strong>
+          <small>连接火、水、风、土与四花色系统</small>
         </a>
-        <a href="#spreads" class="quick-card">
+        <a href="#numbers" class="quick-card">
+          <span>△</span>
+          <strong>小牌数字</strong>
+          <small>理解 1 到 10 在四花色中的表现</small>
+        </a>
+        <a href="#quiz" class="quick-card">
           <span>✷</span>
-          <strong>牌阵</strong>
-          <small>问题的结构</small>
+          <strong>开始练习</strong>
+          <small>用小测和复习巩固牌义理解</small>
+        </a>
+        <a href="#ai-reading" class="quick-card">
+          <span>☽</span>
+          <strong>AI 解读</strong>
+          <small>用文字或照片记录牌阵并生成模拟解读</small>
         </a>
         <a href="#journal" class="quick-card">
           <span>☽</span>

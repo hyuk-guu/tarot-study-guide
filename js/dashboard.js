@@ -104,27 +104,29 @@ function renderStudyProgress() {
     `;
   };
   byId("progress-list").innerHTML = [
-    row("已掌握牌卡", stats.mastered, stats.total),
-    row("已学习牌卡", stats.studied, stats.total),
-    row("学习中", stats.learning),
-    row("今日应复习", stats.dueReview),
-    row("薄弱牌", stats.weak),
     row(stats.groups.major.label, stats.groups.major.mastered, stats.groups.major.total),
-    row(stats.groups.minor.label, stats.groups.minor.mastered, stats.groups.minor.total),
     row(stats.groups.wands.label, stats.groups.wands.mastered, stats.groups.wands.total),
     row(stats.groups.cups.label, stats.groups.cups.mastered, stats.groups.cups.total),
     row(stats.groups.swords.label, stats.groups.swords.mastered, stats.groups.swords.total),
     row(stats.groups.pentacles.label, stats.groups.pentacles.mastered, stats.groups.pentacles.total)
   ].join("");
+  const rhythmList = byId("rhythm-list");
+  if (rhythmList) {
+    rhythmList.innerHTML = `
+      <div class="rhythm-stat"><span>✦</span><strong>${stats.studied}</strong><small>已学习</small></div>
+      <div class="rhythm-stat"><span>◇</span><strong>${stats.mastered}</strong><small>已掌握</small></div>
+      <div class="rhythm-stat"><span>◎</span><strong>${stats.dueReview}</strong><small>今日应复习</small></div>
+      <div class="rhythm-stat"><span>✧</span><strong>${stats.weak}</strong><small>薄弱牌</small></div>
+    `;
+  }
   updateStudyProgress();
   renderDailyReviewPanel();
 }
 
 function updateStudyProgress() {
   const stats = getUserStudyStats();
-  const title = document.querySelector(".progress-card h2");
-  if (title) title.textContent = `${stats.percent}%`;
-  byId("progress-summary").textContent = `已掌握 ${stats.mastered}/${stats.total} · 已学习 ${stats.studied}/${stats.total} · 今日应复习 ${stats.dueReview}`;
+  const progressPill = byId("progress-percent-pill");
+  if (progressPill) progressPill.textContent = `${stats.percent}%`;
   renderDailyReviewPanel();
   renderWeaknessPanel();
 }
@@ -155,8 +157,7 @@ function startNextDueReview() {
 }
 
 function drawDailyCard() {
-  const dailyPool = tarotCards.filter((card) => card.arcana === "Major" || card.suitZh === "权杖");
-  const card = randomItem(dailyPool.length ? dailyPool : tarotCards);
+  const card = randomItem(tarotCards);
   currentDailyCard = card;
   const imageSlot = byId("daily-card-image");
   if (imageSlot) {
